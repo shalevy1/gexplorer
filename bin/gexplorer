@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+import cherrypy
+
+from explorer import settings
+from explorer.ext import GraphService
+from explorer.routes import IndexResource, GraphResource
+
+
+def main():
+    gs = GraphService()
+    cherrypy.tree.mount(IndexResource(), "/", config=settings.index)
+    cherrypy.quickstart(GraphResource(gs), "/s", config=settings.graph)
+
+
+if __name__ == '__main__':
+    cherrypy.config.update(settings.globals)
+    main()
