@@ -35,7 +35,7 @@ ServiceClient.prototype = {
     },
 
     addHeaders: function (xheaders) {
-        for (var header in xheaders) {
+        for (let header in xheaders) {
             this.headers[header] = xheaders[header];
         }
     },
@@ -46,7 +46,7 @@ ServiceClient.prototype = {
     makeRequest: function (path, method, entity) {
         this.preformatUrl(path, entity["$params"]);
 
-        var headers = entity["$headers"];
+        let headers = entity["$headers"];
         if (headers !== undefined) {
         	this.addHeaders(headers);
         }
@@ -55,18 +55,18 @@ ServiceClient.prototype = {
 
     execute: function (method, entity) {
 
-        var pathUrl = this.apiUrl;
-        var headers = this.headers;
+        let pathUrl = this.apiUrl;
+        let headers = this.headers;
 
         entity = JSON.stringify(entity);
 
         // Return a new promise.
         return new Promise(function (resolve, reject) {
             // Do the usual XHR stuff
-            var req = new XMLHttpRequest();
+            let req = new XMLHttpRequest();
             req.open(method, pathUrl);
 
-            for (var header in headers) {
+            for (let header in headers) {
                 req.setRequestHeader(header, headers[header]);
             }
 
@@ -88,7 +88,7 @@ ServiceClient.prototype = {
     }
 };
 
-let GraphService = {
+let GraphResource = {
 
     path: "/s",
     
@@ -105,17 +105,7 @@ let GraphService = {
 let Index = {
 
     init: function() {
-        this.nodes = [];
         this.bind();
-    },
-
-    addNodes: function(nodes) {
-
-        for(let node in nodes) {
-            var data = nodes[node];
-            var key = data.id;
-            this.nodes[key] = data.data
-        }
     },
 
     getNodeInfo: function(node_id) {
@@ -142,44 +132,49 @@ let Index = {
 
     bind: function() {
 
-        var page = this;
-        this.elements.search.addEventListener("keypress", function(evt) {
+        let page = this;
+        page.elements.search.addEventListener("keypress", function(evt) {
             evt.preventDefault();
-            var key = evt.which || evt.keyCode;
+            let key = evt.which || evt.keyCode;
             if (key === 13) { // 13 is enter
-              // code for enter
+                // code for enter
                 page.render(evt.target.value)
             }
         })
     },
 
     render: function(node_id) {
+        let page = this;
         // create a network
-        var container = this.elements.canvas;
-        var page = this;
-        GraphService.query(node_id).then(function(gdata) {
+        let container = page.elements.canvas;
+        let spinner = document.createElement("div");
+        spinner.setAttribute("uk-spinner", "ration: 2");
+        spinner.classList.add("uk-position-center");
+        container.append(spinner)
+        GraphResource.query(node_id).then(function(gdata) {
 
-            page.addNodes(gdata.nodes);
-            var nodes = new vis.DataSet(gdata.nodes);
-            var edges = new vis.DataSet(gdata.edges);
+            console.log(gdata)
 
-            // provide the data in the vis format
-            var data = {
-                nodes: nodes,
-                edges: edges
+            let data = {
+                nodes: new vis.DataSet(gdata.nodes),
+                edges: new vis.DataSet(gdata.edges)
             };
-            var options = {
-                interaction:{hover:true},
+            let options = {
+                groups: gdata.groups,
+                interaction: {
+                    hover:true
+                },
                 layout: {
-                    randomSeed: 1
+                    randomSeed: 1,
+                    improvedLayout: false
                 },
                 nodes: {
                     shape: "dot",
                     font: {
-                        color: "white",
-                        mono: "true"
+                        color: "white"
                     },
-                    borderWidth: 2
+                    borderWidth: 2,
+                    physics: false
                 },
                 edges: {
                     arrows: {
@@ -187,18 +182,16 @@ let Index = {
                             enabled: true
                         }
                     }
-                },
+                }
             };
 
             // initialize your network!
-            var network = new vis.Network(container, data, options);
+            let network = new vis.Network(container, data, options);
             network.on("click", function (params) {
-                console.log(params)
                 params.event = "[original event]";
-                // document.getElementById('eventSpan').innerHTML = '<h2>Click event:</h2>' + JSON.stringify(params, null, 4);
-                var node = this.getNodeAt(params.pointer.DOM);
-                console.log(node);
-                console.log(page.getNodeInfo(node));
+                let node = this.getNodeAt(params.pointer.DOM);
+                let node_data = data.nodes.get(node)
+                console.log(node_data.data);
             });
         });
     }

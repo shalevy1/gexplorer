@@ -4,26 +4,37 @@ from psqlgraph import PsqlGraphDriver
 from explorer.env import env
 
 
-colors = {
+groups = {
     "Aligned Reads": "#3742fa",
     "Aligned Reads Index": "#5352ed",
     "Alignment Workflow": "#353b48",
     "Aliquot": "#7bed9f",
+    "Analyte": "#bdc3c7",
     "Annotated Somatic Mutation": "#192a56",
+    "Archive": "#dd4b39",
+    "Biospecimen Supplement": "#d35400",
     "Case": "#4cd137",
+    "Clinical Supplement": "#16a085",
     "Demographic": "#0097e6",
     "Diagnosis": "#c23616",
+    "File": "#34465d",
+    "Follow-Up": "#c23616",
+    "Portion": "#aa00ff",
     "Read Group": "#ffa502",
     "Sample": "#ff7f50",
     "Simple Somatic Mutation": "#1e90ff",
+    "Slide": "#76608a",
+    "Slide Image": "#6d8764",
     "Somatic Annotation Workflow": "#718093",
     "Somatic Mutation Calling Workflow": "#718093",
     "Somatic Mutation Index": "#1e90ff",
-    "Submitted Unaligned Reads": "#40739e"
+    "Submitted Aligned Reads": "#131418",
+    "Submitted Unaligned Reads": "#40739e",
+    "Treatment": "#f0a30a",
 }
 
 
-class GraphService(object):
+class QueryService(object):
 
     def __init__(self):
         self.g = PsqlGraphDriver(
@@ -56,6 +67,7 @@ class Node(object):
         self.title = "{} ({})".format(label, self.id)
         self._data = data
         self.parent = parent
+        self.shape = "dot"
 
     def __eq__(self, other):
         if isinstance(other, Node):
@@ -67,7 +79,7 @@ class Node(object):
 
     @property
     def json(self):
-        return dict(id=self.id, title=self.title, color=colors.get(self.label, "#2f3542"), data=self._data)
+        return dict(id=self.id, group=self.label, title=self.title, data=self._data, shape=self.shape)
 
 
 class Edge(object):
@@ -94,8 +106,12 @@ class GraphData(object):
 
     def __init__(self, node_id, label, data=None):
         self.root_id = node_id
-        self.nodes = {Node(node_id, label, data=data)}
+
+        node = Node(node_id, label, data=data)
+        node.shape = "box"
+        self.nodes = {node}
         self.edges = set()
+        self.groups = {}
 
     def add_node(self, node, parent_id=None):
         node_data = Node(node.node_id, label=node._dictionary.get("title"), data=node._props)
@@ -103,6 +119,8 @@ class GraphData(object):
 
         edge_data = Edge(node.node_id, parent_id or self.root_id)
         self.edges.add(edge_data)
+
+        self.groups[node_data.label] = {"color": groups.get(node_data.label, "#2f3542")}
 
     def get_nodes(self):
         return [node.json for node in self.nodes]

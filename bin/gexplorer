@@ -1,15 +1,22 @@
 #!/usr/bin/env python
 import cherrypy
+from indexclient.client import IndexClient
 
 from explorer import settings
-from explorer.ext import GraphService
+from explorer.env import env
+from explorer.ext import QueryService
 from explorer.routes import IndexResource, GraphResource
 
 
+def get_index_client():
+    return IndexClient(baseurl=env.get("INDEXD_URL", "http://indexd.service.consul/"),
+                       auth=(env.get("INDEXD_USER"), env.get("INDEXD_PWD")))
+
+
 def main():
-    gs = GraphService()
+    gs = QueryService()
     cherrypy.tree.mount(IndexResource(), "/", config=settings.index)
-    cherrypy.quickstart(GraphResource(gs), "/s", config=settings.graph)
+    cherrypy.quickstart(GraphResource(gs, get_index_client()), "/s", config=settings.graph)
 
 
 if __name__ == '__main__':
