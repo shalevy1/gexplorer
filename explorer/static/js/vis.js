@@ -26255,7 +26255,7 @@ var Label = function () {
       // if no label, return
       if (this.elementOptions.label === undefined) return;
 
-      // check if we have to render the label
+      // check if we have to renderNetwork the label
       var viewFontSize = this.fontOptions.size * this.body.view.scale;
       if (this.elementOptions.label && viewFontSize < this.elementOptions.scaling.label.drawThreshold - 1) return;
 
@@ -42629,7 +42629,7 @@ Network.prototype.setOptions = function (options) {
       util.deepExtend(networkOptions.nodes, this.nodesHandler.options);
       util.deepExtend(networkOptions.edges, this.edgesHandler.options);
       util.deepExtend(networkOptions.layout, this.layoutEngine.options);
-      // load the selectionHandler and render default options in to the interaction group
+      // load the selectionHandler and renderNetwork default options in to the interaction group
       util.deepExtend(networkOptions.interaction, this.selectionHandler.options);
       util.deepExtend(networkOptions.interaction, this.renderer.options);
 
@@ -49131,7 +49131,7 @@ var PhysicsEngine = function () {
     }
 
     /**
-     * The viewFunction inserts this step into each render loop. It calls the physics tick and handles the cleanup at stabilized.
+     * The viewFunction inserts this step into each renderNetwork loop. It calls the physics tick and handles the cleanup at stabilized.
      *
      */
 
@@ -49548,7 +49548,7 @@ var PhysicsEngine = function () {
       // this sets the width of all nodes initially which could be required for the avoidOverlap
       this.body.emitter.emit("_resizeNodes");
 
-      this.stopSimulation(); // stop the render loop
+      this.stopSimulation(); // stop the renderNetwork loop
       this.stabilized = false;
 
       // block redraw requests

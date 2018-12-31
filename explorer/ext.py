@@ -49,13 +49,16 @@ class QueryService(object):
             start_node = self.g.nodes().get(node_id)
             gr = GraphData(start_node.node_id, start_node._dictionary.get("title"), data=start_node._props)
 
-            nodes = [(start_node, None)]
+            nodes = [(start_node, None, None)]  # node, edge, parent_id
 
             while len(nodes) > 0:
-                node, parent_id = nodes.pop()
-                gr.add_node(node, parent_id)
+                node, edge, parent_id = nodes.pop()
+
+                # start node already added, so skip
+                if node.node_id != start_node.node_id:
+                    gr.add_node(node, edge, parent_id)
                 for edge in node.edges_in:
-                    nodes.append((edge.src, node.node_id))
+                    nodes.append((edge.src, edge, node.node_id))
             return gr
 
 
@@ -79,14 +82,15 @@ class Node(object):
 
     @property
     def json(self):
-        return dict(id=self.id, group=self.label, title=self.title, data=self._data, shape=self.shape)
+        return dict(id=self.id, group=self.label, title=self.title, data=self._data)
 
 
 class Edge(object):
 
-    def __init__(self, src, dst, data=None):
+    def __init__(self, src, dst, label, data=None):
         self.src = src
         self.dst = dst
+        self.label = label
         self._data = data
 
     def __eq__(self, other):
@@ -99,7 +103,7 @@ class Edge(object):
 
     @property
     def json(self):
-        return {"from": self.src, "to": self.dst}
+        return {"from": self.src, "to": self.dst, "label": self.label}
 
 
 class GraphData(object):
@@ -108,16 +112,16 @@ class GraphData(object):
         self.root_id = node_id
 
         node = Node(node_id, label, data=data)
-        node.shape = "box"
+        # node.shape = "box"
         self.nodes = {node}
         self.edges = set()
         self.groups = {}
 
-    def add_node(self, node, parent_id=None):
+    def add_node(self, node, edge, parent_id=None):
         node_data = Node(node.node_id, label=node._dictionary.get("title"), data=node._props)
         self.nodes.add(node_data)
 
-        edge_data = Edge(node.node_id, parent_id or self.root_id)
+        edge_data = Edge(node.node_id, parent_id or self.root_id, edge.label)
         self.edges.add(edge_data)
 
         self.groups[node_data.label] = {"color": groups.get(node_data.label, "#2f3542")}
