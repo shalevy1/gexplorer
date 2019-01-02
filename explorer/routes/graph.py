@@ -15,12 +15,13 @@ class GraphResource(object):
 
     @cherrypy.tools.accept(media="text/plain")
     @cherrypy.tools.json_out()
-    def GET(self, node=None):
+    def GET(self, node=None, max_depth=3):
         """ Loads nodes and edges associated with the provided node_id
         Args:
             node (str): node id
+            max_depth (int): maximum depth of the graph to traverse
         Returns:
             dict: JSON dictionary with nodes and edges
         """
-        graph = self.gs.query(node)
+        graph = self.gs.query(node, int(max_depth))
         return dict(nodes=graph.get_nodes(), edges=graph.get_edges(), groups=graph.groups)

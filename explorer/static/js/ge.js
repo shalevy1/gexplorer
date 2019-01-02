@@ -130,12 +130,12 @@ function GraphResource() {
 
 /**
  *
- * @param node_id {string}: node uuid
+ * @param nodeId {string}: node uuid
  * @returns {PromiseLike<T | never> | Promise<T | never> | Ft}
  */
-GraphResource.prototype.query = function (node_id) {
+GraphResource.prototype.query = function (nodeId, maxDepth) {
     let client = new ApiClient();
-    let entity = {"$params": {"node": node_id}, "$headers": {"Content-Type": "text/plain"}};
+    let entity = {"$params": {"node": nodeId, "max_depth": maxDepth}, "$headers": {"Content-Type": "text/plain"}};
     return client.makeRequest(this.resourcePath, "GET", entity).then(JSON.parse);
 };
 
@@ -145,7 +145,8 @@ function IndexPage() {
     this.fields = document.querySelector("#fields");
     this.modalAnchor = document.querySelector("#graph-property");
     this.networkView = document.querySelector("#graph");
-
+    this.networkDepth = document.querySelector("#network-depth");
+    this.legendsView = document.querySelector("#legends-view");
     this.addEvents();
 }
 
@@ -158,74 +159,126 @@ IndexPage.prototype.addEvents = function() {
         if (key === 13) { // 13 is enter
             // code for enter
             showSpinner(page.networkView);
-            renderNetwork(evt.target.value, page.networkView, page.modalAnchor);
+            let maxDepth = page.networkDepth.value;
+            let ntwk = new VisNetwork(evt.target.value, maxDepth, page.networkView, page.modalAnchor, page.legendsView);
+            ntwk.render();
         }
     })
 };
 
-function renderNetwork(node_id, container, modalAnchor) {
+function VisNetwork(root_id, depth, container, modal, legends) {
+    this.root = root_id;
+    this.depth = depth;
 
-    // create a network
-    let graphResource = new GraphResource();
-    graphResource.query(node_id).then(function(gdata) {
+    this.graph = null;
+    this.nodes = null;
+    this.edges = null;
+    this.groups = null;
 
-        console.log(gdata);
+    this.modal = modal;
+    this.container = container;
+    this.legends = legends;
+    this.graphResource = new GraphResource();
+}
 
-        let data = {
-            nodes: new vis.DataSet(gdata.nodes),
-            edges: new vis.DataSet(gdata.edges)
-        };
-        let options = {
-            groups: gdata.groups,
-            interaction: {
-                hover:true
+VisNetwork.prototype.getOptions = function() {
+    return {
+        groups: this.groups,
+        interaction: {
+            hover: true
+        },
+        layout: {
+            improvedLayout: false,
+            hierarchical: {
+                enabled: false,
+                levelSeparation: 150,
+                nodeSpacing: 100,
+                treeSpacing: 200,
+                blockShifting: true,
+                edgeMinimization: true,
+                parentCentralization: true,
+                direction: 'DU',        // UD, DU, LR, RL
+                sortMethod: 'directed'   // hubsize, directed
+            }
+        },
+        nodes: {
+            shape: "dot",
+            font: {
+                color: "white"
             },
-            layout: {
-                improvedLayout: false,
-                hierarchical: {
-                  enabled:false,
-                  levelSeparation: 150,
-                  nodeSpacing: 100,
-                  treeSpacing: 200,
-                  blockShifting: true,
-                  edgeMinimization: true,
-                  parentCentralization: true,
-                  direction: 'DU',        // UD, DU, LR, RL
-                  sortMethod: 'directed'   // hubsize, directed
-                }
-            },
-            nodes: {
-                shape: "dot",
-                font: {
-                    color: "white"
-                },
-                borderWidth: 2
-            },
-            edges: {
-                arrows: {
-                    "from": {
-                        enabled: true
-                    }
+            borderWidth: 2
+        },
+        edges: {
+            arrows: {
+                "from": {
+                    enabled: true
                 }
             }
+        }
+    }
+};
+
+VisNetwork.prototype.render = function() {
+
+    let visNetwork = this;
+    this.graphResource.query(this.root, this.depth).then(function(gdata) {
+
+        // console.log(gdata);
+
+        visNetwork.groups = gdata.groups;
+        visNetwork.nodes = new vis.DataSet(gdata.nodes);
+        visNetwork.edges = new vis.DataSet(gdata.edges);
+
+        let data = {
+            nodes: visNetwork.nodes,
+            edges: visNetwork.edges
         };
 
         // initialize your network!
-        let network = new vis.Network(container, data, options);
+        let network = new vis.Network(visNetwork.container, data, visNetwork.getOptions());
         network.on("click", function (params) {
             params.event = "[original event]";
             let node = this.getNodeAt(params.pointer.DOM);
-            let node_data = data.nodes.get(node)
-            console.log(node_data.data);
-            modalAnchor.innerHTML = renderNetworkProperties(node_data);
-            UIkit.modal(modalAnchor).show();
+            if (node !== null && node !== undefined) {
+                let node_data = data.nodes.get(node);
+                visNetwork.modalAnchor.innerHTML = renderNetworkProperties(node_data);
+                UIkit.modal(visNetwork.modalAnchor).show();
+            }
         });
-    });
-}
 
-function networkProperties(networkData) {
+        // render legends
+        visNetwork.renderLegend();
 
-}
+        // network.on("click", function (params) {
+        //     params.event = "[original event]";
+        //     let node = this.getNodeAt(params.pointer.DOM);
+        //     if (node !== null && node !== undefined) {
+        //         let node_data = data.nodes.get(node);
+        //         console.log(node_data.data);
+        //         graphResource.query(node, maxDepth).then(function(gdata) {
+        //             let gnodes = gdata.nodes;
+        //             let gedges = gdata.edges;
+        //
+        //             for (let gnode in gnodes) {
+        //                 nodes.update(gnodes[gnode]);
+        //             }
+        //
+        //             for (let gnode in gedges) {
+        //                 edges.update(gedges[gnode]);
+        //             }
+        //         });
+        //     }
+        });
+};
+
+VisNetwork.prototype.renderLegend = function() {
+    let inHtml = "";
+    for (let grp in this.groups) {
+        let group = this.groups[grp]
+        inHtml += "<div style='background-color=    '" + group.color + "'>" + grp + "</div>"
+    }
+    this.legends.innerHTML = inHtml;
+};
 
 function renderNetworkProperties(networkData) {
     return `

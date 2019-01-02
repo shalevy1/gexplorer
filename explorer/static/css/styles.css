@@ -1,2 +1,12 @@
 @import url("vis.min.css");
 @import url("uikit.min.css");
+
+#search {
+    font-size: medium;
+    padding-left: 10px;
+}
+
+.uk-accordion-title {
+    background-color: #ddecff;
+    padding: 5px;
+}
