@@ -17,7 +17,7 @@ function ApiClient() {
  * @param resourcePath {string}: resource path
  * @param queryParams: {Object}: key value pairs
  */
-ApiClient.prototype.makeUrl = function (resourcePath, queryParams) {
+ApiClient.prototype.generateUrl = function (resourcePath, queryParams) {
 
     this.resourceUrl += resourcePath;
 
@@ -58,7 +58,7 @@ ApiClient.prototype.addHeaders = function (xheaders) {
  * @returns {*}
  */
 ApiClient.prototype.makeRequest = function (path, method, payload) {
-    this.makeUrl(path, payload["$params"]);
+    this.generateUrl(path, payload["$params"]);
 
     let headers = payload["$headers"];
     if (headers !== undefined) {
@@ -129,12 +129,21 @@ GraphResource.prototype.query = function (nodeId, maxDepth) {
     return client.makeRequest(this.resourcePath, "GET", entity).then(JSON.parse);
 };
 
+/**
+ * Local state impl
+ * @constructor
+ */
 function Store() {
     this.state = new Map();
     this.listeners = new Map();
     this.isMutating = false;
 }
 
+/**
+ * Retrieves state for a given key
+ * @param state {string}: state key
+ * @returns {*}: value associated wit key or null
+ */
 Store.prototype.getState = function (state) {
     if (this.state.hasOwnProperty(state)) {
         return this.state[state];
@@ -142,13 +151,14 @@ Store.prototype.getState = function (state) {
     return null;
 };
 
-
+/**
+ * Sets the value for a given state and dispatches changes to available listeners
+ * @param state {string}: state key
+ * @param value {Object}: value for state
+ */
 Store.prototype.update = function (state, value) {
 
-    // while(this.isMutating) {
-    //     // wait
-    //     console.log("Waiting");
-    // }
+    // TODO if is mutating, wait
 
     this.isMutating = true;
 
@@ -158,6 +168,11 @@ Store.prototype.update = function (state, value) {
     this.isMutating = false;
 };
 
+/**
+ * Adds a listener to a given state key, listeners are triggered once there is a change state
+ * @param state {string}: state key
+ * @param callback {function}: listener function
+ */
 Store.prototype.subscribe = function (state, callback) {
     let listeners = this.listeners[state];
     if (listeners === undefined)
@@ -176,33 +191,20 @@ Store.prototype.dispatch = function (state) {
     }
 };
 
-function createState() {
-    return new Store();
+/**
+ * Creates a new state
+ * @param initialState {Object}: key value object pair
+ * @returns {Store}
+ */
+function createState(initialState) {
+    let state = new Store();
+    if (initialState !== null || initialState !== undefined) {
+        state.state = initialState
+    }
+    return state;
 }
 
-
-function showSpinner(container) {
-    let spinner = document.createElement("div");
-
-    spinner.setAttribute("uk-spinner", "ration: 2");
-    spinner.classList.add("uk-position-center");
-
-    container.innerHTML = spinner.outerHTML;
-
-}
-
-function IndexPage() {
-
-    this.searchBar = document.querySelector("#search");
-    this.fields = document.querySelector("#fields");
-    this.modalAnchor = document.querySelector("#graph-property");
-    this.networkView = document.querySelector("#graph");
-    this.networkDepth = document.querySelector("#network-depth");
-    this.legendsView = document.querySelector("#legends-view");
-    this.addEvents();
-}
-
-const state = createState();
+const state = createState({});
 
 function logState() {
     console.log("Search Param: " + state.getState("search"))
@@ -210,26 +212,48 @@ function logState() {
 
 state.subscribe("search", logState);
 
-IndexPage.prototype.addEvents = function() {
+function Index() {
 
+    this.graphTitle = document.querySelector("#graph-title");
+    this.searchBar = document.querySelector("#search");
+    this.fields = document.querySelector("#fields");
+    this.modalAnchor = document.querySelector("#graph-property");
+    this.networkView = document.querySelector("#graph");
+    this.networkDepth = document.querySelector("#network-depth");
+    this.legendsView = document.querySelector("#legends-view");
+
+    this.addSearchEventListener();
+}
+
+Index.prototype.addSearchEventListener = function() {
     let page = this;
     this.searchBar.addEventListener("keydown", function(evt) {
-        let key = evt.which || evt.keyCode;
-        state.update("search", evt.target.value);
-        if (key === 13) { // 13 is enter
+
+        let queryValue = evt.target.value;
+        state.update("search", queryValue);
+
+        if (evt.which === 13) { // 13 is enter
+
             evt.preventDefault();
+            let maxDepth = page.networkDepth.value;
 
-            let uuid = evt.target.value;
-
-            if (isValidUuid(uuid)) {
-                showSpinner(page.networkView);
-                let maxDepth = page.networkDepth.value;
-                let ntwk = new VisNetwork(uuid, maxDepth, page.networkView, page.modalAnchor, page.legendsView);
-                state.update("networkGroups", ntwk.groups);
+            if (isValidUuid(queryValue)) {
+                page.showSpinner(page.networkView);
+                let ntwk = new VisNetwork(queryValue, maxDepth, page.networkView, page.modalAnchor, page.legendsView);
                 ntwk.render();
             }
         }
-    })
+    });
+};
+
+Index.prototype.showSpinner = function(container) {
+    let spinner = document.createElement("div");
+
+    spinner.setAttribute("uk-spinner", "ration: 2");
+    spinner.classList.add("uk-position-center");
+
+    container.innerHTML = spinner.outerHTML;
+
 };
 
 function isValidUuid(uuid) {
@@ -246,6 +270,7 @@ function VisNetwork(root_id, depth, container, modal, legends) {
     this.nodes = null;
     this.edges = null;
     this.groups = null;
+    this.network = null;
 
     this.modal = modal;
     this.container = container;
@@ -290,7 +315,7 @@ VisNetwork.prototype.getOptions = function() {
             }
         },
         physics: {
-
+            maxVelocity: 10
         }
     }
 };
@@ -299,8 +324,6 @@ VisNetwork.prototype.render = function() {
 
     let visNetwork = this;
     this.graphResource.query(this.root, this.depth).then(function(gdata) {
-
-        // console.log(gdata);
 
         let groups = gdata.groups;
         visNetwork.nodes = new vis.DataSet(gdata.nodes);
@@ -329,13 +352,11 @@ VisNetwork.prototype.render = function() {
             params.event = "[original event]";
             let node = this.getNodeAt(params.pointer.DOM);
             if (node !== null && node !== undefined) {
-                // update options
-                network.setOptions(visNetwork.getOptions());
-
-                // render new nodes if any
+                // render new nodes aif any
                 visNetwork.renderNode(node);
             }
         });
+        visNetwork.network = network;
     });
 };
 
@@ -347,6 +368,7 @@ VisNetwork.prototype.renderNode = function(nodeId) {
         let groups = node_data.groups;
         groups = Object.assign(visNetwork.groups, groups);
         visNetwork.storeNetworkGroups(groups);
+        visNetwork.network.setOptions(visNetwork.getOptions());
 
         for (let node in nodes) {
             visNetwork.nodes.update(nodes[node]);
@@ -360,7 +382,11 @@ VisNetwork.prototype.renderNode = function(nodeId) {
 
 VisNetwork.prototype.renderLegend = function() {
     let inHtml = "";
-    let groups = state.getState("networkGroups");
+    let unsorted_groups = state.getState("networkGroups");
+    const  groups = {};
+    Object.keys(unsorted_groups).sort().forEach(function (key) {
+        groups[key] = unsorted_groups[key];
+    });
     for (let grp in groups) {
         if (groups.hasOwnProperty(grp)){
             let group = groups[grp];
@@ -377,8 +403,13 @@ VisNetwork.prototype.storeNetworkGroups = function(groups) {
 
 function legendView(grp, color) {
     return `
-        <div class="uk-light uk-text-bold uk-padding-small" style="background-color: ${color}">
-            ${grp}
+        <div class="uk-grid-collapse" uk-grid>
+            <div class="uk-width-1-5" style="background-color: ${color}">
+                
+            </div>
+            <div class="uk-width-4-5 uk-text-truncate">
+                ${grp}
+            </div>
         </div>
     `
 }
@@ -398,5 +429,5 @@ function renderNetworkProperties(networkData) {
 }
 
 (function() {
-    let index = new IndexPage();
+    let index = new Index();
 })();
