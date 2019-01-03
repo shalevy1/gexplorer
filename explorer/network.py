@@ -32,6 +32,10 @@ class Edge(object):
         self.label = label
         self._data = data
 
+    @property
+    def edge_id(self):
+        return "{}-{}-{}".format(self.src, self.label, self.dst)
+
     def __eq__(self, other):
         if isinstance(other, Edge):
             return self.src == other.src and self.dst == other.dst
@@ -42,7 +46,7 @@ class Edge(object):
 
     @property
     def json(self):
-        return {"from": self.src, "to": self.dst, "label": self.label}
+        return {"from": self.src, "to": self.dst, "label": self.label, "id": self.edge_id}
 
 
 def get_group(label):
