@@ -7,5 +7,9 @@ setup(
     packages=find_packages(exclude=('tests', 'docs')),
     install_requires=[
         "cherrypy==17.4.1",
+    ],
+    package_data={"explorer": ["static/*.html", "static/*/*.js", "static/*/*.css"]},
+    scripts=[
+        "bin/gexplorer"
     ]
 )

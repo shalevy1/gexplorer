@@ -24,3 +24,8 @@ graph = {
         'tools.response_headers.on': True,
     }
 }
+
+
+def set_globals(port, threads):
+    globals["server.socket_port"] = port or 19891
+    globals["server.thread_pool"] = threads or 10
