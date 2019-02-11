@@ -1,4 +1,5 @@
 import cherrypy
+from cherrypy._cpdispatch import MethodDispatcher
 
 
 @cherrypy.expose

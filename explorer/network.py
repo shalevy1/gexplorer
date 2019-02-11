@@ -56,7 +56,3 @@ def get_group(label):
 def get_color(label):
     label_color = hex(hash(label) & 0x00FFFFFF)
     return "#{:f<6}".format(label_color[2:])
-
-
-if __name__ == '__main__':
-    print get_group("Submitted Unaligned Reads")
