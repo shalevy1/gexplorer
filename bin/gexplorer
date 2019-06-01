@@ -6,7 +6,7 @@ from indexclient.client import IndexClient
 
 from explorer import settings
 from explorer.env import env
-from explorer.ext import QueryService
+from explorer.graph.search import GSearch
 from explorer.routes import IndexResource, GraphResource
 
 
@@ -38,7 +38,7 @@ def main():
 
     action = args.action
     if action == "start":
-        gs = QueryService()
+        gs = GSearch()
         cherrypy.tree.mount(IndexResource(), "/", config=settings.index)
         cherrypy.quickstart(GraphResource(gs, get_index_client()), "/s", config=settings.graph)
     else:

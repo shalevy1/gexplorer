@@ -4507,7 +4507,7 @@ var _NodeBase3 = _interopRequireDefault(_NodeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * Base class for constructing Node/Cluster Shapes.
+ * Base class for constructing GNode/Cluster Shapes.
  *
  * @extends NodeBase
  */
@@ -4855,9 +4855,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
   } else if (typeof exports === 'object') {
-    // Node. Does not work with strict CommonJS, but
+    // GNode. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
-    // like Node.
+    // like GNode.
     module.exports = factory();
   } else {
     // Browser globals (root is window)
@@ -7402,7 +7402,7 @@ var Node = function () {
    *                              {string} label  Text label for the node
    *                              {number} x      Horizontal position of the node
    *                              {number} y      Vertical position of the node
-   *                              {string} shape  Node shape
+   *                              {string} shape  GNode shape
    *                              {string} image  An image url
    *                              {string} title  A title text, can be HTML
    *                              {anytype} group A group name or number
@@ -7492,7 +7492,7 @@ var Node = function () {
       }
 
       if (this.id === undefined) {
-        throw new Error("Node must have an id");
+        throw new Error("GNode must have an id");
       }
 
       Node.checkMass(options, this.id);
@@ -7785,7 +7785,7 @@ var Node = function () {
     }
 
     /**
-     * Calculate the distance to the border of the Node
+     * Calculate the distance to the border of the GNode
      * @param {CanvasRenderingContext2D}   ctx
      * @param {number} angle        Angle in radians
      * @returns {number} distance   Distance to the border in pixels
@@ -25849,14 +25849,14 @@ var Label = function () {
   }
 
   /**
-   * @param {Object} options the options of the parent Node-instance
+   * @param {Object} options the options of the parent GNode-instance
    */
 
 
   (0, _createClass3['default'])(Label, [{
     key: 'setOptions',
     value: function setOptions(options) {
-      this.elementOptions = options; // Reference to the options of the parent Node-instance 
+      this.elementOptions = options; // Reference to the options of the parent GNode-instance
 
       this.initFontOptions(options.font);
 
@@ -25943,7 +25943,7 @@ var Label = function () {
     value: function constrain(pile) {
       // NOTE: constrainWidth and  constrainHeight never set!
       // NOTE: for edge labels, only 'maxWdt' set
-      // Node labels can set all the fields
+      // GNode labels can set all the fields
       var fontOptions = {
         constrainWidth: false,
         maxWdt: -1,
@@ -29491,7 +29491,7 @@ $export($export.S + $export.F * !USE_NATIVE, 'Object', {
 // 24.3.2 JSON.stringify(value [, replacer [, space]])
 $JSON && $export($export.S + $export.F * (!USE_NATIVE || $fails(function () {
   var S = $Symbol();
-  // MS Edge converts symbol values to JSON as {}
+  // MS GEdge converts symbol values to JSON as {}
   // WebKit converts symbol values to JSON as null
   // V8 throws on boxed symbols
   return _stringify([S]) != '[null]' || _stringify({ a: S }) != '{}' || _stringify(Object(S)) != '{}';
@@ -31501,7 +31501,7 @@ function chooseLocale(names) {
 
 function loadLocale(name) {
     var oldLocale = null;
-    // TODO: Find a better way to register and load all the locales in Node
+    // TODO: Find a better way to register and load all the locales in GNode
     if (!locales[name] && (typeof module !== 'undefined') &&
             module && module.exports) {
         try {
@@ -37680,9 +37680,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
   } else if (typeof exports === 'object') {
-    // Node. Does not work with strict CommonJS, but
+    // GNode. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
-    // like Node.
+    // like GNode.
     module.exports = factory();
   } else {
     // Browser globals (root is window)
@@ -43354,10 +43354,10 @@ exports['en'] = {
   edit: 'Edit',
   del: 'Delete selected',
   back: 'Back',
-  addNode: 'Add Node',
-  addEdge: 'Add Edge',
-  editNode: 'Edit Node',
-  editEdge: 'Edit Edge',
+  addNode: 'Add GNode',
+  addEdge: 'Add GEdge',
+  editNode: 'Edit GNode',
+  editEdge: 'Edit GEdge',
   addDescription: 'Click in an empty space to place a new node.',
   edgeDescription: 'Click on a node and drag the edge to another node to connect them.',
   editEdgeDescription: 'Click on the control points and drag them to a node to connect to it.',
@@ -43427,9 +43427,9 @@ exports['nl'] = {
   edit: 'Wijzigen',
   del: 'Selectie verwijderen',
   back: 'Terug',
-  addNode: 'Node toevoegen',
+  addNode: 'GNode toevoegen',
   addEdge: 'Link toevoegen',
-  editNode: 'Node wijzigen',
+  editNode: 'GNode wijzigen',
   editEdge: 'Link wijzigen',
   addDescription: 'Klik op een leeg gebied om een nieuwe node te maken.',
   edgeDescription: 'Klik op een node en sleep de link naar een andere node om ze te verbinden.',
@@ -44240,7 +44240,7 @@ var NodesHandler = function () {
     /**
      * create a node
      * @param {Object} properties
-     * @param {class} [constructorClass=Node.default]
+     * @param {class} [constructorClass=GNode.default]
      * @returns {*}
      */
 
@@ -44421,7 +44421,7 @@ var NodesHandler = function () {
           _this4.body.emitter.emit("startSimulation");
         }, 0);
       } else {
-        console.log("Node id supplied to moveNode does not exist. Provided: ", nodeId);
+        console.log("GNode id supplied to moveNode does not exist. Provided: ", nodeId);
       }
     }
   }]);
@@ -45381,7 +45381,7 @@ var _NodeBase3 = _interopRequireDefault(_NodeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Box Node/Cluster shape.
+ * A Box GNode/Cluster shape.
  *
  * @extends NodeBase
  */
@@ -45604,7 +45604,7 @@ var _CircleImageBase3 = _interopRequireDefault(_CircleImageBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Circle Node/Cluster shape.
+ * A Circle GNode/Cluster shape.
  *
  * @extends CircleImageBase
  */
@@ -45747,7 +45747,7 @@ var _CircleImageBase3 = _interopRequireDefault(_CircleImageBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A CircularImage Node/Cluster shape.
+ * A CircularImage GNode/Cluster shape.
  *
  * @extends CircleImageBase
  */
@@ -45914,7 +45914,7 @@ var _NodeBase3 = _interopRequireDefault(_NodeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Database Node/Cluster shape.
+ * A Database GNode/Cluster shape.
  *
  * @extends NodeBase
  */
@@ -46036,7 +46036,7 @@ var _ShapeBase3 = _interopRequireDefault(_ShapeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Diamond Node/Cluster shape.
+ * A Diamond GNode/Cluster shape.
  *
  * @extends ShapeBase
  */
@@ -46126,7 +46126,7 @@ var _ShapeBase3 = _interopRequireDefault(_ShapeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Dot Node/Cluster shape.
+ * A Dot GNode/Cluster shape.
  *
  * @extends ShapeBase
  */
@@ -46218,7 +46218,7 @@ var _NodeBase3 = _interopRequireDefault(_NodeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * Am Ellipse Node/Cluster shape.
+ * Am Ellipse GNode/Cluster shape.
  *
  * @extends NodeBase
  */
@@ -46344,7 +46344,7 @@ var _NodeBase3 = _interopRequireDefault(_NodeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * An icon replacement for the default Node shape.
+ * An icon replacement for the default GNode shape.
  *
  * @extends NodeBase
  */
@@ -46527,7 +46527,7 @@ var _CircleImageBase3 = _interopRequireDefault(_CircleImageBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * An image-based replacement for the default Node shape.
+ * An image-based replacement for the default GNode shape.
  *
  * @extends CircleImageBase
  */
@@ -46701,7 +46701,7 @@ var _ShapeBase3 = _interopRequireDefault(_ShapeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Square Node/Cluster shape.
+ * A Square GNode/Cluster shape.
  *
  * @extends ShapeBase
  */
@@ -46791,7 +46791,7 @@ var _ShapeBase3 = _interopRequireDefault(_ShapeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Hexagon Node/Cluster shape.
+ * A Hexagon GNode/Cluster shape.
  *
  * @extends ShapeBase
  */
@@ -46881,7 +46881,7 @@ var _ShapeBase3 = _interopRequireDefault(_ShapeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Star Node/Cluster shape.
+ * A Star GNode/Cluster shape.
  *
  * @extends ShapeBase
  */
@@ -46971,7 +46971,7 @@ var _NodeBase3 = _interopRequireDefault(_NodeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A text-based replacement for the default Node shape.
+ * A text-based replacement for the default GNode shape.
  *
  * @extends NodeBase
  */
@@ -47094,7 +47094,7 @@ var _ShapeBase3 = _interopRequireDefault(_ShapeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Triangle Node/Cluster shape.
+ * A Triangle GNode/Cluster shape.
  *
  * @extends ShapeBase
  */
@@ -47184,7 +47184,7 @@ var _ShapeBase3 = _interopRequireDefault(_ShapeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A downward facing Triangle Node/Cluster shape.
+ * A downward facing Triangle GNode/Cluster shape.
  *
  * @extends ShapeBase
  */
@@ -47469,7 +47469,7 @@ var EdgesHandler = function () {
     key: 'setOptions',
     value: function setOptions(options) {
       if (options !== undefined) {
-        // use the parser from the Edge class to fill in all shorthand notations
+        // use the parser from the GEdge class to fill in all shorthand notations
         Edge.parseOptions(this.options, options, true, this.defaultOptions, true);
 
         // update smooth settings in all edges
@@ -47652,7 +47652,7 @@ var EdgesHandler = function () {
     }
 
     /**
-     * Refreshes Edge Handler
+     * Refreshes GEdge Handler
      */
 
   }, {
@@ -47840,7 +47840,7 @@ var _CubicBezierEdgeBase3 = _interopRequireDefault(_CubicBezierEdgeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Cubic Bezier Edge. Bezier curves are used to model smooth gradual
+ * A Cubic Bezier GEdge. Bezier curves are used to model smooth gradual
  * curves in paths between nodes.
  *
  * @extends CubicBezierEdgeBase
@@ -48148,7 +48148,7 @@ var _BezierEdgeBase3 = _interopRequireDefault(_BezierEdgeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 /**
- * A Dynamic Bezier Edge. Bezier curves are used to model smooth gradual
+ * A Dynamic Bezier GEdge. Bezier curves are used to model smooth gradual
  * curves in paths between nodes. The Dynamic piece refers to how the curve
  * reacts to physics changes.
  *
@@ -48425,7 +48425,7 @@ var _BezierEdgeBase3 = _interopRequireDefault(_BezierEdgeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Static Bezier Edge. Bezier curves are used to model smooth gradual
+ * A Static Bezier GEdge. Bezier curves are used to model smooth gradual
  * curves in paths between nodes.
  *
  * @extends BezierEdgeBase
@@ -48690,7 +48690,7 @@ var _EdgeBase3 = _interopRequireDefault(_EdgeBase2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /**
- * A Straight Edge.
+ * A Straight GEdge.
  *
  * @extends EdgeBase
  */
@@ -50469,7 +50469,7 @@ appear in the members of the cluster nodes. For data update, it is therefore
 important to scan these lists as well as the cluster nodes.
 
 
-### Cluster Node
+### Cluster GNode
 
 A cluster node has the following extra fields:
 
@@ -50485,7 +50485,7 @@ A cluster node has the following extra fields:
    connecting two nodes in the same cluster.
 
 
-### Cluster Edge
+### Cluster GEdge
 
 These are the items in the `edges` member of a clustered node. They have the
 following relevant members:
@@ -50496,7 +50496,7 @@ Note that it's possible to nest clusters, so that `clusteringEdgeReplacingIds`
 can contain edge id's of other clusters.
 
 
-### Clustered Edge
+### Clustered GEdge
 
 This is any edge contained by a cluster edge. It gets the following additional
 member:
@@ -50863,8 +50863,8 @@ var ClusterEngine = function () {
     * This function creates the edges that will be attached to the cluster
     * It looks for edges that are connected to the nodes from the "outside' of the cluster.
     *
-    * @param {{Node.id: vis.Node}} childNodesObj
-    * @param {{vis.Edge.id: vis.Edge}} childEdgesObj
+    * @param {{GNode.id: vis.GNode}} childNodesObj
+    * @param {{vis.GEdge.id: vis.GEdge}} childEdgesObj
     * @param {Object} clusterNodeProperties
     * @param {Object} clusterEdgeProperties
     * @private
@@ -51090,7 +51090,7 @@ var ClusterEngine = function () {
       // force the ID to remain the same
       clusterNodeProperties.id = clusterId;
 
-      // create the cluster Node
+      // create the cluster GNode
       // Note that allowSingleNodeCluster, if present, is stored in the options as well
       var clusterNode = this.body.functions.createNode(clusterNodeProperties, Cluster);
       clusterNode.containedNodes = childNodesObj;
@@ -51154,7 +51154,7 @@ var ClusterEngine = function () {
       if (this.body.nodes[nodeId] !== undefined) {
         return this.body.nodes[nodeId].isCluster === true;
       } else {
-        console.log("Node does not exist.");
+        console.log("GNode does not exist.");
         return false;
       }
     }
@@ -51707,7 +51707,7 @@ var ClusterEngine = function () {
      * NOTE: If you know a cleaner way to do this, please enlighten me (wimrijnders).
      *
      * @param {Node.id} nodeId
-     * @returns {Node|undefined} Node instance for cluster, if present
+     * @returns {Node|undefined} GNode instance for cluster, if present
      * @private
      */
 
@@ -52035,8 +52035,8 @@ var util = __webpack_require__(2);
 var Node = __webpack_require__(47)["default"];
 
 /**
- * A Cluster is a special Node that allows a group of Nodes positioned closely together
- * to be represented by a single Cluster Node.
+ * A Cluster is a special GNode that allows a group of Nodes positioned closely together
+ * to be represented by a single Cluster GNode.
  *
  * @extends Node
  */
@@ -53355,7 +53355,7 @@ var View = function () {
 
         this.moveTo(options);
       } else {
-        console.log("Node: " + nodeId + " cannot be found.");
+        console.log("GNode: " + nodeId + " cannot be found.");
       }
     }
 
@@ -53501,7 +53501,7 @@ var View = function () {
     }
 
     /**
-     * Resets state of a locked on Node
+     * Resets state of a locked on GNode
      */
 
   }, {
@@ -55625,7 +55625,7 @@ var SelectionHandler = function () {
 
           var node = this.body.nodes[id];
           if (!node) {
-            throw new RangeError('Node with id "' + id + '" not found');
+            throw new RangeError('GNode with id "' + id + '" not found');
           }
           // don't select edges with it
           this.selectObject(node, options.highlightEdges);
@@ -55638,7 +55638,7 @@ var SelectionHandler = function () {
 
           var edge = this.body.edges[id];
           if (!edge) {
-            throw new RangeError('Edge with id "' + id + '" not found');
+            throw new RangeError('GEdge with id "' + id + '" not found');
           }
           this.selectObject(edge);
         }
@@ -56919,7 +56919,7 @@ var LayoutEngine = function () {
           }
 
           if (newPosition !== nodePosition) {
-            //console.log("moving Node:",diff, minSpace, maxSpace);
+            //console.log("moving GNode:",diff, minSpace, maxSpace);
             _this3.direction.setPosition(node, newPosition);
             //this.body.emitter.emit("_redraw");
             stillShifting = true;
@@ -57008,8 +57008,8 @@ var LayoutEngine = function () {
     /**
      * This gives the space around the node. IF a map is supplied, it will only check against nodes NOT in the map.
      * This is used to only get the distances to nodes outside of a branch.
-     * @param {Node} node
-     * @param {{Node.id: vis.Node}} map
+     * @param {GNode} node
+     * @param {{GNode.id: vis.GNode}} map
      * @returns {number[]}
      * @private
      */
@@ -57528,7 +57528,7 @@ var LayoutEngine = function () {
         // Crawl from the given starting node
         var _node2 = this.body.nodes[startingNodeId];
         if (_node2 === undefined) {
-          console.error("Node not found:", startingNodeId);
+          console.error("GNode not found:", startingNodeId);
           return;
         }
         crawler(_node2);

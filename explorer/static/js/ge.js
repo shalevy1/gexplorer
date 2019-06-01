@@ -123,9 +123,13 @@ function GraphResource() {
  * @param nodeId {string}: node uuid
  * @returns {PromiseLike<T | never> | Promise<T | never> | Ft}
  */
-GraphResource.prototype.query = function (nodeId, maxDepth) {
+GraphResource.prototype.query = function (nodeId, maxDepth, exclude_label) {
     let client = new ApiClient();
-    let entity = {"$params": {"node": nodeId, "max_depth": maxDepth}, "$headers": {"Content-Type": "text/plain"}};
+    let params = {"node": nodeId, "max_depth": maxDepth};
+    if (exclude_label !== undefined || exclude_label !== null) {
+        params["exclude_edge_label"] = exclude_label
+    }
+    let entity = {"$params": params, "$headers": {"Content-Type": "text/plain"}};
     return client.makeRequest(this.resourcePath, "GET", entity).then(JSON.parse);
 };
 
@@ -221,8 +225,27 @@ function Index() {
     this.networkView = document.querySelector("#graph");
     this.networkDepth = document.querySelector("#network-depth");
     this.legendsView = document.querySelector("#legends-view");
+    this.excludeLabel = document.querySelector("#exclude-label");
 
     this.addSearchEventListener();
+    this.addExcludeLabelEvent();
+    state.subscribe("excludeLabels", this.resetExcludeLabels.bind(this));
+}
+
+Index.prototype.addExcludeLabelEvent = function() {
+    let page = this;
+    this.excludeLabel.addEventListener("change", function (evt) {
+        let label = evt.target.value;
+        let node_id = page.searchBar.value;
+        let maxDepth = page.networkDepth.value;
+
+        if (isValidUuid(node_id)) {
+            page.showSpinner(page.networkView);
+            let ntwk = new VisNetwork(node_id, maxDepth, page.networkView, page.modalAnchor, page.legendsView, label);
+            ntwk.render();
+        }
+
+    });
 }
 
 Index.prototype.addSearchEventListener = function() {
@@ -256,15 +279,36 @@ Index.prototype.showSpinner = function(container) {
 
 };
 
+Index.prototype.resetExcludeLabels = function() {
+    let labels = state.getState("excludeLabels");
+
+    // clear current options
+    for (let i = 0; i < this.excludeLabel.length; i++) {
+        if (this.excludeLabel.options[i].value !== "0") {
+            this.excludeLabel.options[i].remove();
+        }
+    }
+
+    // add new options
+    for (let label_index in labels) {
+        let option = document.createElement("option")
+        option.value = labels[label_index]
+        option.text = labels[label_index]
+        this.excludeLabel.add(option);
+    }
+    console.log(labels)
+};
+
 function isValidUuid(uuid) {
     const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     let result = regex.exec(uuid);
     return result !== null && result.length === 1;
 }
 
-function VisNetwork(root_id, depth, container, modal, legends) {
+function VisNetwork(root_id, depth, container, modal, legends, exclude_label) {
     this.root = root_id;
     this.depth = depth;
+    this.excludeLabel = exclude_label;
 
     this.graph = null;
     this.nodes = null;
@@ -323,11 +367,12 @@ VisNetwork.prototype.getOptions = function() {
 VisNetwork.prototype.render = function() {
 
     let visNetwork = this;
-    this.graphResource.query(this.root, this.depth).then(function(gdata) {
+    this.graphResource.query(this.root, this.depth, this.excludeLabel).then(function(gdata) {
 
         let groups = gdata.groups;
         visNetwork.nodes = new vis.DataSet(gdata.nodes);
         visNetwork.edges = new vis.DataSet(gdata.edges);
+        state.update("excludeLabels", gdata.edge_labels);
 
         let data = {
             nodes: visNetwork.nodes,
