@@ -1,0 +1,4 @@
+include LICENSE
+graft explorer/static
+graft explorer/templates
+global-exclude *.pyc

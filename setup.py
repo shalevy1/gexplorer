@@ -5,11 +5,12 @@ setup(
     version="1.0.0",
     description="Graph Data Explorer",
     packages=find_packages(exclude=('tests', 'docs')),
+    zip_safe=False,
+    license="Apache License 2.0",
+    include_package_data=True,
     install_requires=[
-        "cherrypy==17.4.1",
+        "flask",
+        "python-dotenv"
     ],
-    package_data={"explorer": ["static/*.html", "static/*/*.js", "static/*/*.css"]},
-    scripts=[
-        "bin/gexplorer"
-    ]
+    package_data={"explorer": ["static/*.html", "static/*/*.js", "static/*/*.css"]}
 )

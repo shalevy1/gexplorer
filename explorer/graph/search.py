@@ -1,6 +1,7 @@
+import os
+
 from psqlgraph import PsqlGraphDriver
 
-from explorer.env import env
 from explorer.graph.core import GExpl
 
 
@@ -11,15 +12,15 @@ class GSearch(object):
         self.init_models()
 
         self.g = PsqlGraphDriver(
-            host=env.get("DB_HOST", "postgres.service.consul"),
-            user=env.get("DB_USER"),
-            password=env.get("DB_PWD"),
-            database=env.get("DB_NAME")
+            host=os.environ.get("DB_HOST", "postgres.service.consul"),
+            user=os.environ.get("DB_USER"),
+            password=os.environ.get("DB_PWD"),
+            database=os.environ.get("DB_NAME")
         )
 
     @staticmethod
     def init_models():
-        mode = env.get("DEPLOY_MODE", "gdc")
+        mode = os.environ.get("DEPLOY_MODE", "gdc")
         if mode == "gdc":
             from gdcdatamodel import models  # noqa
 

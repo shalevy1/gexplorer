@@ -1,7 +1,8 @@
-cherrypy==17.4.1
+flask==1.0.3
+python-dotenv==0.10.3
 git+ssh://git@github.com/NCI-GDC/cdisutils.git@1.2.2#egg=cdisutils
 git+ssh://git@github.com/uc-cdis/dictionaryutils.git@2.0.2#egg=dictionaryutils
 git+ssh://git@github.com/NCI-GDC/gdcdictionary.git@release/marvin#egg=gdcdictionary
 git+ssh://git@github.com/NCI-GDC/gdcdatamodel.git@release/marvin#egg=gdcdatamodel
-git+ssh://git@github.com/NCI-GDC/psqlgraph.git@1.2.1#egg=psqlgraph
+git+ssh://git@github.com/NCI-GDC/psqlgraph.git@62473c25e0f788045ba9efda77c736016ea49c25#egg=psqlgraph
 git+ssh://git@github.com/uc-cdis/indexclient.git@1.5.7#egg=indexclient

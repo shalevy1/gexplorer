@@ -1,8 +1,9 @@
-import cherrypy
+import flask
 
 
-class IndexResource(object):
+blueprint = flask.Blueprint("index", __name__, url_prefix="")
 
-    @cherrypy.expose
-    def index(self):
-        return "Hello World"
+
+@blueprint.route("/")
+def index():
+    return flask.render_template("welcome.html", data={})
