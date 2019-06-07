@@ -10,7 +10,11 @@ setup(
     include_package_data=True,
     install_requires=[
         "flask",
-        "python-dotenv"
+        "python-dotenv",
+        "psqlgraph",
+        "gdcdictionary",
+        "biodictionary",
+        "gdcdatamodel"
     ],
     package_data={"explorer": ["static/*.html", "static/*/*.js", "static/*/*.css"]}
 )

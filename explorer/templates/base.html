@@ -1,33 +1,37 @@
 <!doctype html>
-<title>{{ title }} </title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-<nav class="uk-light uk-background-secondary uk-padding-small" uk-navbar="boundary-align: true; align: center;">
-    <div class="uk-navbar-left">
-        <a class="uk-navbar-item uk-logo" href="#">GExplore</a>
-    </div>
-    <div class="uk-navbar-right">
-        <div class="uk-navbar-item">
-            <form class="uk-search uk-search-navbar">
-                <div class="uk-margin">
-                    <div class="uk-inline uk-width-expand">
-                        <span class="uk-search-icon-flip" uk-search-icon></span>
-                        <input id="search" placeholder="Enter node uuid" class="uk-search-input" type="search">
+<html>
+    <head>
+        {% include 'includes/header.html' %}
+    </head>
+    <body>
+        <section class="content">
+          <header>
+            {% block header %}
+            <nav class="uk-light uk-background-secondary uk-padding-small" uk-navbar="boundary-align: true; align: center;">
+                <div class="uk-navbar-left">
+                    <a class="uk-navbar-item uk-logo" href="#">GExplore</a>
+                </div>
+                <div class="uk-navbar-right">
+                    <div class="uk-navbar-item">
+                        <form class="uk-search uk-search-navbar">
+                            <div class="uk-margin">
+                                <div class="uk-inline uk-width-expand">
+                                    <span class="uk-search-icon-flip" uk-search-icon></span>
+                                    <input id="search" placeholder="Enter node uuid" class="uk-search-input" type="search">
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </form>
-        </div>
-    </div>
-</nav>
-<section class="content">
-  <header>
-    {% block header %}
+            </nav>
+            {% endblock %}
+          </header>
+          {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+          {% endfor %}
+          {% block content %}
 
-    {% endblock %}
-  </header>
-  {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-  {% block content %}
-
-  {% endblock %}
-</section>
+          {% endblock %}
+        </section>
+    </body>
+</html>

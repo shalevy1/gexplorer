@@ -1,18 +1,47 @@
+import os
+
 import flask
 
-from explorer import routes
-from explorer.graph import search
+import datamodelutils
+from biodictionary import biodictionary
+from dictionaryutils import dictionary
+
+from explorer import api
+from explorer import views
+from explorer.core import search
 
 
 def make_app():
     app = flask.Flask(__name__, instance_relative_config=True)
 
     app.config.from_mapping(
-        SECRET_KEY="test"
+        SECRET_KEY="test",
+        ACTIVE_DICT=os.environ.get("ACTIVE_DICT", "gdc")
     )
 
+    init_data_models()
     app.gs = search.GSearch()
 
-    app.register_blueprint(routes.index.blueprint)
-    app.register_blueprint(routes.graph.blueprint)
+    # register views
+    app.register_blueprint(views.index.blueprint)
+
+    # register api endpoints
+    app.register_blueprint(api.graph.blueprint)
+
+    app.register_error_handler(404, page_not_found)
     return app
+
+
+def page_not_found(e):
+    pass
+
+
+def init_data_models():
+    active_dict = os.environ.get("ACTIVE_DICT", "gdc")
+    if active_dict == "gdc":
+        from gdcdatamodel import models
+    elif active_dict == "bio":
+        models = datamodelutils.models
+        dictionary.init(biodictionary)
+        from gdcdatamodel import models as md
+        models.init(md)

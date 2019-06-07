@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from argparse import ArgumentParser
+import os
 
-import cherrypy
+import click
+from flask.cli import FlaskGroup
+
 from indexclient.client import IndexClient
 
-from explorer import settings
-from explorer.env import env
-from explorer.graph.search import GSearch
-from explorer.routes import IndexResource, GraphResource
+import explorer
 
 
 def parse_args():
@@ -28,23 +28,14 @@ def parse_args():
 
 
 def get_index_client():
-    return IndexClient(baseurl=env.get("INDEXD_URL", "http://indexd.service.consul/"),
-                       auth=(env.get("INDEXD_USER"), env.get("INDEXD_PWD")))
+    return IndexClient(baseurl=os.environ.get("INDEXD_URL", "http://indexd.service.consul/"),
+                       auth=(os.environ.get("INDEXD_USER"), os.environ.get("INDEXD_PWD")))
 
 
+@click.command(cls=FlaskGroup, create_app=explorer.make_app())
 def main():
-    args = parse_args()
-    settings.set_globals(args.port, args.threads)
-
-    action = args.action
-    if action == "start":
-        gs = GSearch()
-        cherrypy.tree.mount(IndexResource(), "/", config=settings.index)
-        cherrypy.quickstart(GraphResource(gs, get_index_client()), "/s", config=settings.graph)
-    else:
-        raise NotImplementedError("Unsupported command {}", action)
+    click.echo("started application")
 
 
 if __name__ == '__main__':
-    cherrypy.config.update(settings.globals)
     main()

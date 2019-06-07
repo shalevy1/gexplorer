@@ -2,7 +2,7 @@ import os
 
 from psqlgraph import PsqlGraphDriver
 
-from explorer.graph.core import GExpl
+from explorer.core.core import GExpl
 
 
 class GSearch(object):
@@ -17,12 +17,6 @@ class GSearch(object):
             password=os.environ.get("DB_PWD"),
             database=os.environ.get("DB_NAME")
         )
-
-    @staticmethod
-    def init_models():
-        mode = os.environ.get("DEPLOY_MODE", "gdc")
-        if mode == "gdc":
-            from gdcdatamodel import models  # noqa
 
     def query(self, node_id, max_depth=None, exclude_edge=None):
         with self.g.session_scope():
