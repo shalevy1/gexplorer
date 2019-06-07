@@ -14,7 +14,11 @@ setup(
         "psqlgraph",
         "gdcdictionary",
         "biodictionary",
-        "gdcdatamodel"
+        "gdcdatamodel",
+        "waitress"
     ],
-    package_data={"explorer": ["static/*.html", "static/*/*.js", "static/*/*.css"]}
+    package_data={"explorer": ["static/*.html", "static/*/*.js", "static/*/*.css"]},
+    scripts=[
+        "bin/gexplorer"
+    ]
 )

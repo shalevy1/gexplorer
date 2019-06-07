@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from argparse import ArgumentParser
 import os
+from argparse import ArgumentParser
 
-import click
-from flask.cli import FlaskGroup
+import logging
+import waitress
 
 from indexclient.client import IndexClient
 
@@ -14,7 +14,7 @@ def parse_args():
 
     parser = ArgumentParser(description="Graph Explorer script")
     parser.add_argument("-p", "--port",
-                        help="HTTP port to listen on", required=False)
+                        help="HTTP port to listen on", required=False, type=int, default=19891)
 
     subparser = parser.add_subparsers()
 
@@ -32,9 +32,19 @@ def get_index_client():
                        auth=(os.environ.get("INDEXD_USER"), os.environ.get("INDEXD_PWD")))
 
 
-@click.command(cls=FlaskGroup, create_app=explorer.make_app())
 def main():
-    click.echo("started application")
+
+    logger = logging.getLogger('waitress')
+    logger.setLevel(logging.INFO)
+
+    args = parse_args()
+
+    action = args.action
+    if action == "start":
+        app = explorer.make_app()
+        waitress.serve(app, host="0.0.0.0", port=args.port)
+    else:
+        raise NotImplementedError("Unsupported command {}", action)
 
 
 if __name__ == '__main__':

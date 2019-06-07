@@ -2,14 +2,12 @@ import os
 
 from psqlgraph import PsqlGraphDriver
 
-from explorer.core.core import GExpl
+from explorer.core import GExpl
 
 
 class GSearch(object):
 
     def __init__(self):
-
-        self.init_models()
 
         self.g = PsqlGraphDriver(
             host=os.environ.get("DB_HOST", "postgres.service.consul"),
