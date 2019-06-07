@@ -2,9 +2,7 @@ import os
 
 import flask
 
-import datamodelutils
-from biodictionary import biodictionary
-from dictionaryutils import dictionary
+#import datamodelutils
 
 from explorer import api
 from explorer import views
@@ -26,7 +24,7 @@ def make_app():
     app.register_blueprint(views.index.blueprint)
 
     # register api endpoints
-    app.register_blueprint(api.graph.blueprint)
+    app.register_blueprint(api.search.v0.blueprint)
 
     # handle errors
     app.register_error_handler(404, page_not_found)
@@ -43,10 +41,19 @@ def internal_server_error(e):
 
 def init_data_models():
     active_dict = os.environ.get("ACTIVE_DICT", "gdc")
+    print(active_dict)
     if active_dict == "gdc":
         from gdcdatamodel import models
     elif active_dict == "bio":
-        models = datamodelutils.models
+        from datamodelutils import models as m
+        from biodictionary import biodictionary
+        from dictionaryutils import dictionary
         dictionary.init(biodictionary)
-        from gdcdatamodel import models as md
-        models.init(md)
+        from gdcdatamodel import models as biomodels
+        m.init(biomodels)
+        # from biodictionary import biodictionary
+        # from dictionaryutils import dictionary
+        # dictionary.init(biodictionary)
+        # from datamodelutils import models
+        # from gdcdatamodel import models as md
+        # models.init(md)
