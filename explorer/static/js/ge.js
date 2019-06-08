@@ -333,14 +333,14 @@ VisNetwork.prototype.getOptions = function() {
         layout: {
             improvedLayout: false,
             hierarchical: {
-                enabled: false,
+                enabled: true,
                 levelSeparation: 150,
                 nodeSpacing: 100,
                 treeSpacing: 200,
                 blockShifting: true,
                 edgeMinimization: true,
-                parentCentralization: true,
-                direction: 'DU',        // UD, DU, LR, RL
+                parentCentralization: false,
+                direction: 'UD',        // UD, DU, LR, RL
                 sortMethod: 'directed'   // hubsize, directed
             }
         },
