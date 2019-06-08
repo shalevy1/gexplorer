@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * JS Restful API
+ * JS Restful API client
  */
 function ApiClient() {
 
@@ -13,7 +13,7 @@ function ApiClient() {
 }
 
 /**
- * Formats the url by appending query params to the base url
+ * Formats the url by appending get_subtree params to the base url
  * @param resourcePath {string}: resource path
  * @param queryParams: {Object}: key value pairs
  */
@@ -73,7 +73,7 @@ ApiClient.prototype.makeRequest = function (path, method, payload) {
  * @param entity
  * @returns {Promise<any>}
  */
-ApiClient.prototype. execute = function (method, entity) {
+ApiClient.prototype.execute = function (method, entity) {
 
     let resourceUrl = this.resourceUrl;
     let headers = this.headers;
@@ -121,17 +121,43 @@ function GraphResource() {
 /**
  *
  * @param nodeId {string}: node uuid
+ * @param maxDepth {int}: maximum allowed depth of tree
+ * @param maxBreadth (int): maximum allowed breadth for each node
+ * @param exclude_label (boolean): exclude case cache edges if true
  * @returns {PromiseLike<T | never> | Promise<T | never> | Ft}
  */
-GraphResource.prototype.query = function (nodeId, maxDepth, exclude_label) {
+GraphResource.prototype.get_subtree = function (nodeId, maxDepth, maxBreadth, exclude_label) {
     let client = new ApiClient();
-    let params = {"node": nodeId, "max_depth": maxDepth};
+    let params = {
+            "node": nodeId,
+            "max_depth": maxDepth,
+            "max_breadth": maxBreadth
+        };
     if (exclude_label !== undefined || exclude_label !== null) {
-        params["exclude_edge_label"] = exclude_label
+        params["exclude_case_cache"] = exclude_label
     }
     let entity = {"$params": params, "$headers": {"Content-Type": "text/plain"}};
     return client.makeRequest(this.resourcePath, "GET", entity).then(JSON.parse);
 };
+
+/**
+ *
+ * @param nodeId {string}: node uuid
+ * @param maxDepth {int}: maximum allowed depth of tree
+ * @param maxBreadth (int): maximum allowed breadth for each node
+ * @param exclude_label (boolean): exclude case cache edges if true
+ * @returns {PromiseLike<T | never> | Promise<T | never> | Ft}
+ */
+GraphResource.prototype.find_matching = function (nodeId) {
+    let client = new ApiClient();
+    let path = this.resourcePath + "/find";
+    let params = {
+            "node": nodeId
+        };
+    let entity = {"$params": params, "$headers": {"Content-Type": "application/json"}};
+    return client.makeRequest(path, "GET", entity).then(JSON.parse);
+};
+
 
 /**
  * Local state impl
@@ -219,55 +245,92 @@ state.subscribe("search", logState);
 function Index() {
 
     this.graphTitle = document.querySelector("#graph-title");
+
     this.searchBar = document.querySelector("#search");
     this.fields = document.querySelector("#fields");
     this.modalAnchor = document.querySelector("#graph-property");
     this.networkView = document.querySelector("#graph");
     this.networkDepth = document.querySelector("#network-depth");
+    this.nodeBreadth = document.querySelector("#node-breadth");
     this.legendsView = document.querySelector("#legends-view");
-    this.excludeLabel = document.querySelector("#exclude-label");
+    this.excludeLabel = document.querySelector("#exclude-case-cache");
 
-    this.addSearchEventListener();
-    this.addExcludeLabelEvent();
-    state.subscribe("excludeLabels", this.resetExcludeLabels.bind(this));
+    // api client
+    this.client = new GraphResource();
+
+    this.handleSearch();
 }
 
-Index.prototype.addExcludeLabelEvent = function() {
+
+Index.prototype.handleSearch = function() {
     let page = this;
-    this.excludeLabel.addEventListener("change", function (evt) {
-        let label = evt.target.value;
-        let node_id = page.searchBar.value;
-        let maxDepth = page.networkDepth.value;
+    this.searchBar.addEventListener("input", function(evt) {
 
-        if (isValidUuid(node_id)) {
-            page.showSpinner(page.networkView);
-            let ntwk = new VisNetwork(node_id, maxDepth, page.networkView, page.modalAnchor, page.legendsView, label);
-            ntwk.render();
-        }
-
-    });
-}
-
-Index.prototype.addSearchEventListener = function() {
-    let page = this;
-    this.searchBar.addEventListener("keydown", function(evt) {
-
+        evt.preventDefault();
         let queryValue = evt.target.value;
+        if (queryValue.length < 4) {
+            return false;
+        }
         state.update("search", queryValue);
 
+        console.log(evt.which)
         if (evt.which === 13) { // 13 is enter
 
-            evt.preventDefault();
-            let maxDepth = page.networkDepth.value;
+            // clean up hack
+            UIkit.sticky("#close-search").$el.click();
+
+            let maxDepth = page.networkDepth;
+            let nodeBreadth = page.nodeBreadth;
 
             if (isValidUuid(queryValue)) {
                 page.showSpinner(page.networkView);
-                let ntwk = new VisNetwork(queryValue, maxDepth, page.networkView, page.modalAnchor, page.legendsView);
+                let ntwk = new VisNetwork(queryValue, maxDepth, nodeBreadth,
+                    page.networkView, page.modalAnchor, page.legendsView, page.excludeLabel);
                 ntwk.render();
             }
+        }else {
+
+            page.closeAutoCompleteItems(evt.target);
+            let  div = document.createElement("DIV");
+            div.setAttribute("id", this.id + "ge-autocomplete-list");
+            div.setAttribute("class", "ge-autocomplete-items");
+            /*append the DIV element as a child of the autocomplete container:*/
+            this.parentNode.appendChild(div);
+
+            page.client.find_matching(queryValue).then(function (data) {
+
+                    for (let index in data.nodes) {
+                        let node = data.nodes[index];
+                        let node_id = node.node_id
+                        let startPos = node_id.indexOf(queryValue);
+                        console.log(node);
+                        let boldArea = "<strong>" + node_id.substr(startPos, queryValue.length) + "</strong>";
+                        x.substr(0, 31) + x.substr(31, 4) + x.substr(35, x.length)
+                        let b = document.createElement("DIV");
+                        b.innerHTML = node.type + " ( " + node_id.substr(0, startPos) + boldArea + node_id.substr(startPos + queryValue.length)" ) ";
+                        b.innerHTML += "<input type='hidden' value='" + node.node_id + "'>";
+                        /*execute a function when someone clicks on the item value (DIV element):*/
+                        b.addEventListener("click", function (e) {
+                            page.searchBar.value = this.getElementsByTagName("input")[0].value;
+                            page.closeAutoCompleteItems(evt.target);
+                        });
+                        div.appendChild(b);
+                    }
+                });
         }
     });
 };
+
+Index.prototype.closeAutoCompleteItems = function(inp, elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    let x = document.getElementsByClassName("ge-autocomplete-items");
+    for (let i = 0; i < x.length; i++) {
+      if (elmnt !== x[i] && elmnt !== inp) {
+        x[i].parentNode.removeChild(x[i]);
+      }
+    }
+  }
 
 Index.prototype.showSpinner = function(container) {
     let spinner = document.createElement("div");
@@ -279,35 +342,16 @@ Index.prototype.showSpinner = function(container) {
 
 };
 
-Index.prototype.resetExcludeLabels = function() {
-    let labels = state.getState("excludeLabels");
-
-    // clear current options
-    for (let i = 0; i < this.excludeLabel.length; i++) {
-        if (this.excludeLabel.options[i].value !== "0") {
-            this.excludeLabel.options[i].remove();
-        }
-    }
-
-    // add new options
-    for (let label_index in labels) {
-        let option = document.createElement("option")
-        option.value = labels[label_index]
-        option.text = labels[label_index]
-        this.excludeLabel.add(option);
-    }
-    console.log(labels)
-};
-
 function isValidUuid(uuid) {
     const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     let result = regex.exec(uuid);
     return result !== null && result.length === 1;
 }
 
-function VisNetwork(root_id, depth, container, modal, legends, exclude_label) {
+function VisNetwork(root_id, depth, nodeBreadth, container, modal, legends, exclude_label) {
     this.root = root_id;
     this.depth = depth;
+    this.breadth = nodeBreadth;
     this.excludeLabel = exclude_label;
 
     this.graph = null;
@@ -367,12 +411,12 @@ VisNetwork.prototype.getOptions = function() {
 VisNetwork.prototype.render = function() {
 
     let visNetwork = this;
-    this.graphResource.query(this.root, this.depth, this.excludeLabel).then(function(gdata) {
+    this.graphResource.get_subtree(this.root, this.depth.value, this.breadth.value,
+        this.excludeLabel.checked).then(function(gdata) {
 
         let groups = gdata.groups;
         visNetwork.nodes = new vis.DataSet(gdata.nodes);
         visNetwork.edges = new vis.DataSet(gdata.edges);
-        state.update("excludeLabels", gdata.edge_labels);
 
         let data = {
             nodes: visNetwork.nodes,
@@ -407,7 +451,7 @@ VisNetwork.prototype.render = function() {
 
 VisNetwork.prototype.renderNode = function(nodeId) {
     let visNetwork = this;
-    this.graphResource.query(nodeId, this.depth).then(function(node_data) {
+    this.graphResource.get_subtree(nodeId, this.depth, this.breadth, this.excludeLabel.checked).then(function(node_data) {
         let nodes = node_data.nodes;
         let edges = node_data.edges;
         let groups = node_data.groups;
@@ -452,7 +496,7 @@ function legendView(grp, color) {
             <div class="uk-width-1-5" style="background-color: ${color}">
                 
             </div>
-            <div class="uk-width-4-5 uk-text-truncate">
+            <div class="uk-width-4-5 uk-text-truncate " style="padding-left: 10px;">
                 ${grp}
             </div>
         </div>

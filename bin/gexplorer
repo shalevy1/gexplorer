@@ -22,7 +22,7 @@ def parse_args():
     start = subparser.add_parser("start", help="Start the server")
     start.add_argument("-t", "--threads",
                        help="thread pool size",
-                       default=10, type=int)
+                       default=4, type=int)
     start.set_defaults(action="start")
     return parser.parse_args()
 
@@ -42,7 +42,7 @@ def main():
     action = args.action
     if action == "start":
         app = explorer.make_app()
-        waitress.serve(app, host="0.0.0.0", port=args.port)
+        waitress.serve(app, host="0.0.0.0", port=args.port, threads=args.threads)
     else:
         raise NotImplementedError("Unsupported command {}", action)
 

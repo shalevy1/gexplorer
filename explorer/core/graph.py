@@ -4,7 +4,7 @@ class GNode(object):
         self.id = node_id
         self.label = label
         self.title = "{} ({})".format(label, self.id)
-        self.data = data or {}
+        self._data = data or {}
         self.shape = shape
 
     def __eq__(self, other):
@@ -14,6 +14,10 @@ class GNode(object):
 
     def __hash__(self):
         return hash(self.title)
+
+    @property
+    def data(self):
+        return self._data
 
     @property
     def json(self):
@@ -53,6 +57,14 @@ class GExpl(object):
         self.groups = {}
         self.edge_labels = set()
 
+    def add_node(self, node):
+        """ Adds a single node """
+        n_data = dict(props=node.properties, sysan=node.system_annotations)
+        node_title = node._dictionary.get("title")
+        g_node = GNode(node.node_id, node_title, data=n_data)
+        self.nodes.add(g_node)
+        self.groups[node_title] = get_group(node_title)
+
     def add_edge(self, src, dst, edge_label):
         """ Adds an edge
         Args:
@@ -60,14 +72,9 @@ class GExpl(object):
             dst (psqlgraph.Node):
             edge_label (str):
         """
-        src_node = GNode(src.node_id, src._dictionary.get("title"), data=src.properties)
-        dst_node = GNode(dst.node_id, dst._dictionary.get("title"), data=dst.properties)
 
-        self.nodes.add(src_node)
-        self.groups[src_node.label] = get_group(src_node.label)
-
-        self.nodes.add(dst_node)
-        self.groups[dst_node.label] = get_group(dst_node.label)
+        self.add_node(src)
+        self.add_node(dst)
 
         # gdc graph has reverse representations for src/dst
         edge_data = GEdge(dst.node_id, src.node_id, edge_label)

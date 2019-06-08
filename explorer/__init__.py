@@ -1,8 +1,7 @@
 import os
 
 import flask
-
-#import datamodelutils
+import psqlgraph
 
 from explorer import api
 from explorer import views
@@ -18,7 +17,7 @@ def make_app():
     )
 
     init_data_models()
-    app.gs = search.GSearch()
+    app.gs = search.GSearch(pg_driver=init_pg_graph())
 
     # register views
     app.register_blueprint(views.index.blueprint)
@@ -41,9 +40,8 @@ def internal_server_error(e):
 
 def init_data_models():
     active_dict = os.environ.get("ACTIVE_DICT", "gdc")
-    print(active_dict)
     if active_dict == "gdc":
-        from gdcdatamodel import models
+        from gdcdatamodel import models  # noqa
     elif active_dict == "bio":
         from datamodelutils import models as m
         from biodictionary import biodictionary
@@ -51,9 +49,12 @@ def init_data_models():
         dictionary.init(biodictionary)
         from gdcdatamodel import models as biomodels
         m.init(biomodels)
-        # from biodictionary import biodictionary
-        # from dictionaryutils import dictionary
-        # dictionary.init(biodictionary)
-        # from datamodelutils import models
-        # from gdcdatamodel import models as md
-        # models.init(md)
+
+
+def init_pg_graph():
+    return psqlgraph.PsqlGraphDriver(
+        host=os.environ.get("DB_HOST", "postgres.service.consul"),
+        user=os.environ.get("DB_USER"),
+        password=os.environ.get("DB_PWD"),
+        database=os.environ.get("DB_NAME")
+    )
