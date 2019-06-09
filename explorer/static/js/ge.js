@@ -258,11 +258,11 @@ function Index() {
     // api client
     this.client = new GraphResource();
 
-    this.handleSearch();
+    this.bindSearch();
 }
 
 
-Index.prototype.handleSearch = function() {
+Index.prototype.bindSearch = function() {
     let page = this;
     this.searchBar.addEventListener("input", function(evt) {
 
@@ -273,12 +273,11 @@ Index.prototype.handleSearch = function() {
         }
         state.update("search", queryValue);
 
-        console.log(evt.which)
+        console.log(evt.which);
         if (evt.which === 13) { // 13 is enter
-
+            evt.preventDefault();
             // clean up hack
             UIkit.sticky("#close-search").$el.click();
-
             let maxDepth = page.networkDepth;
             let nodeBreadth = page.nodeBreadth;
 
@@ -303,12 +302,10 @@ Index.prototype.handleSearch = function() {
                         let node = data.nodes[index];
                         let node_id = node.node_id
                         let startPos = node_id.indexOf(queryValue);
-                        console.log(node);
-                        let boldArea = "<strong>" + node_id.substr(startPos, queryValue.length) + "</strong>";
-                        x.substr(0, 31) + x.substr(31, 4) + x.substr(35, x.length)
+                        let boldArea = "<b>" + node_id.substr(startPos, queryValue.length) + "</b>";
                         let b = document.createElement("DIV");
-                        b.innerHTML = node.type + " ( " + node_id.substr(0, startPos) + boldArea + node_id.substr(startPos + queryValue.length)" ) ";
-                        b.innerHTML += "<input type='hidden' value='" + node.node_id + "'>";
+                        b.innerHTML = node.type + " ( " + node_id.substr(0, startPos) + boldArea + node_id.substr(startPos + queryValue.length) + " ) ";
+                        b.innerHTML += "<input type='hidden' value='" + node_id + "'>";
                         /*execute a function when someone clicks on the item value (DIV element):*/
                         b.addEventListener("click", function (e) {
                             page.searchBar.value = this.getElementsByTagName("input")[0].value;
@@ -318,6 +315,12 @@ Index.prototype.handleSearch = function() {
                     }
                 });
         }
+        return false;
+    });
+
+    this.searchBar.addEventListener("keydown", function (evt) {
+        let x = document.getElementById(this.id + "autocomplete-list");
+        if (x) x = x.getElementsByTagName("div");
     });
 };
 
