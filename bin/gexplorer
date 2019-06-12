@@ -1,20 +1,22 @@
 #!/usr/bin/env python
+import os
 from argparse import ArgumentParser
 
-import cherrypy
+import logging
+
+import dotenv
+import waitress
+
 from indexclient.client import IndexClient
 
-from explorer import settings
-from explorer.env import env
-from explorer.graph.search import GSearch
-from explorer.routes import IndexResource, GraphResource
+import explorer
 
 
 def parse_args():
 
     parser = ArgumentParser(description="Graph Explorer script")
     parser.add_argument("-p", "--port",
-                        help="HTTP port to listen on", required=False)
+                        help="HTTP port to listen on", required=False, type=int, default=19891)
 
     subparser = parser.add_subparsers()
 
@@ -22,29 +24,30 @@ def parse_args():
     start = subparser.add_parser("start", help="Start the server")
     start.add_argument("-t", "--threads",
                        help="thread pool size",
-                       default=10, type=int)
+                       default=4, type=int)
     start.set_defaults(action="start")
     return parser.parse_args()
 
 
 def get_index_client():
-    return IndexClient(baseurl=env.get("INDEXD_URL", "http://indexd.service.consul/"),
-                       auth=(env.get("INDEXD_USER"), env.get("INDEXD_PWD")))
+    return IndexClient(baseurl=os.environ.get("INDEXD_URL", "http://indexd.service.consul/"),
+                       auth=(os.environ.get("INDEXD_USER"), os.environ.get("INDEXD_PWD")))
 
 
 def main():
+    dotenv.load_dotenv(verbose=True)
+    logger = logging.getLogger('waitress')
+    logger.setLevel(logging.INFO)
+
     args = parse_args()
-    settings.set_globals(args.port, args.threads)
 
     action = args.action
     if action == "start":
-        gs = GSearch()
-        cherrypy.tree.mount(IndexResource(), "/", config=settings.index)
-        cherrypy.quickstart(GraphResource(gs, get_index_client()), "/s", config=settings.graph)
+        app = explorer.make_app()
+        waitress.serve(app, host="0.0.0.0", port=args.port, threads=args.threads)
     else:
         raise NotImplementedError("Unsupported command {}", action)
 
 
 if __name__ == '__main__':
-    cherrypy.config.update(settings.globals)
     main()

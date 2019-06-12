@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div uk-grid class="uk-grid-match uk-height-1-1">
+    <div class="uk-width-expand">
+<!--        <div id="graph-title">-->
+
+<!--        </div>-->
+        <div id="graph" class="uk-inline"></div>
+    </div>
+    <div class="uk-width-1-5" style="background-color: beige; padding-left: 10px;">
+        <div>
+            <table>
+                <tr>
+                    <td>Database</td>
+                    <td>{{ ctx.database }}</td>
+                </tr>
+                <tr>
+                    <td>Mode</td>
+                    <td>
+                        {{ ctx.active_dict }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Max Depth</td>
+                    <td>
+                        <input class="uk-input uk-form-small" id="network-depth" type="number" value="4">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Max Breadth</td>
+                    <td>
+                        <input class="uk-input uk-form-small" id="node-breadth" type="number" value="10">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Hide Case Cache
+                    </td>
+                    <td>
+                        <input type="checkbox" id="exclude-case-cache" checked>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <div id="legends-view">
+
+            </div>
+        </div>
+    </div>
+</div>
+<div id="graph-property" class="uk-modal-container" uk-modal></div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/ge-data.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ge-search.js') }}"></script>
+{% endblock %}

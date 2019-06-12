@@ -1,0 +1,58 @@
+<!doctype html>
+<html class="uk-height-1-1">
+    <head>
+        {% include 'includes/header.html' %}
+    </head>
+    <body class="uk-height-1-1">
+        <header>
+            {% block header %}
+            <nav class="uk-light uk-background-secondary" uk-navbar="boundary-align: true; align: center;">
+                <div class="uk-navbar-left">
+                    <a class="uk-navbar-item uk-logo" href="/">GExplore</a>
+                </div>
+                <div class="uk-navbar-right">
+                    <ul class="uk-navbar-nav">
+                        <li class="{% if ctx.page == 'home' %} uk-active {% endif %}"><a href="/">Data Browser</a></li>
+                        <li class="{% if ctx.page == 'templates' %} uk-active {% endif %}"><a href="/templates">Template Explorer</a></li>
+                    </ul>
+                    {% if ctx.page == 'home' %}
+                    <a class="uk-navbar-toggle uk-icon uk-search-icon" href="#modal-full" uk-search-icon="" uk-toggle="">
+                        <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="search-icon">
+                            <circle fill="none" stroke="#000" stroke-width="1.1" cx="9" cy="9" r="7"></circle>
+                            <path fill="none" stroke="#000" stroke-width="1.1" d="M14,14 L18,18 L14,14 Z"></path>
+                        </svg>
+                    </a>
+                    {% endif %}
+                </div>
+            </nav>
+            {% endblock %}
+        </header>
+        {% for message in get_flashed_messages() %}
+        <div class="flash">{{ message }}</div>
+        {% endfor %}
+        {% block content %}
+
+        {% endblock %}
+        <div id="modal-full" class="uk-modal-full uk-modal" uk-modal="" style="">
+            <div class="uk-modal-dialog uk-flex uk-flex-center" uk-height-viewport="" style="min-height: calc(100vh);">
+                <button class="uk-modal-close-full uk-icon uk-close" type="button" uk-close="" id="close-search">
+                    <svg width="14" height="14" viewBox="0 0 14 14"
+                         xmlns="http://www.w3.org/2000/svg" data-svg="close-icon">
+                        <line fill="none" stroke="#000" stroke-width="1.1" x1="1" y1="1" x2="13" y2="13"></line>
+                        <line fill="none" stroke="#000" stroke-width="1.1" x1="13" y1="1" x2="1" y2="13"></line>
+                    </svg>
+                </button>
+                <form autocomplete="off" style="margin-top: 20%; min-width: 60%;">
+                    <div class="uk-margin ge-autocomplete uk-width-1-1">
+                        <div>
+                            <input class="uk-search-input uk-form-width-large" type="search" placeholder="Search by node id" autofocus="" id="search">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% block scripts %}
+
+    {% endblock %}
+    </body>
+</html>
