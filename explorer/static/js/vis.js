@@ -10473,7 +10473,7 @@ Core.prototype.repaint = function () {
 };
 
 /**
- * Set a current time. This can be used for example to ensure that a client's
+ * Set a current time. This can be used for example to ensure that a searchResource's
  * time is synchronized with a shared server time.
  * Only applicable when option `showCurrentTime` is true.
  * @param {Date | string | number} time     A Date, unix timestamp, or
@@ -11711,7 +11711,7 @@ CurrentTime.prototype.stop = function () {
 };
 
 /**
- * Set a current time. This can be used for example to ensure that a client's
+ * Set a current time. This can be used for example to ensure that a searchResource's
  * time is synchronized with a shared server time.
  * @param {Date | string | number} time     A Date, unix timestamp, or
  *                                          ISO date string.
@@ -16103,7 +16103,7 @@ Slider.prototype.setIndex = function (index) {
     this.redraw();
     this.onChange();
   } else {
-    throw new Error('Index out of range');
+    throw new Error('DataViewer out of range');
   }
 };
 
@@ -17112,7 +17112,7 @@ Filter.prototype.getValues = function () {
  * @return {*} value
  */
 Filter.prototype.getValue = function (index) {
-  if (index >= this.values.length) throw new Error('Index out of range');
+  if (index >= this.values.length) throw new Error('DataViewer out of range');
 
   return this.values[index];
 };
@@ -17161,7 +17161,7 @@ Filter.prototype.setOnLoadCallback = function (callback) {
  * @param {number} index
  */
 Filter.prototype.selectValue = function (index) {
-  if (index >= this.values.length) throw new Error('Index out of range');
+  if (index >= this.values.length) throw new Error('DataViewer out of range');
 
   this.index = index;
   this.value = this.values[index];

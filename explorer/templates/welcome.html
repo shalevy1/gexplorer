@@ -13,7 +13,13 @@
             <table>
                 <tr>
                     <td>Database</td>
-                    <td>postgres.service.consul</td>
+                    <td>{{ ctx.database }}</td>
+                </tr>
+                <tr>
+                    <td>Mode</td>
+                    <td>
+                        {{ ctx.active_dict }}
+                    </td>
                 </tr>
                 <tr>
                     <td>Max Depth</td>
@@ -47,5 +53,6 @@
 <div id="graph-property" class="uk-modal-container" uk-modal></div>
 {% endblock %}
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/ge.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ge-data.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ge-search.js') }}"></script>
 {% endblock %}

@@ -15,12 +15,14 @@
                         <li class="{% if ctx.page == 'home' %} uk-active {% endif %}"><a href="/">Data Browser</a></li>
                         <li class="{% if ctx.page == 'templates' %} uk-active {% endif %}"><a href="/templates">Template Explorer</a></li>
                     </ul>
+                    {% if ctx.page == 'home' %}
                     <a class="uk-navbar-toggle uk-icon uk-search-icon" href="#modal-full" uk-search-icon="" uk-toggle="">
                         <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="search-icon">
                             <circle fill="none" stroke="#000" stroke-width="1.1" cx="9" cy="9" r="7"></circle>
                             <path fill="none" stroke="#000" stroke-width="1.1" d="M14,14 L18,18 L14,14 Z"></path>
                         </svg>
                     </a>
+                    {% endif %}
                 </div>
             </nav>
             {% endblock %}

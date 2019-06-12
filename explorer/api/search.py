@@ -1,7 +1,7 @@
 import flask
 
 
-blueprint = flask.Blueprint("graph", __name__, url_prefix="/s")
+blueprint = flask.Blueprint("search", __name__, url_prefix="/s")
 
 
 @blueprint.route("", methods=["GET"])

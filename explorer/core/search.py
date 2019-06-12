@@ -31,12 +31,12 @@ class GSearch(object):
 
             while nodes:
                 node, edge, current_depth = nodes.pop()
-
+                node_data = None
                 if not edge:
                     # handle nodes leaf nodes
                     gr.add_node(node)
 
-                elif exclude_case_cache and edge.label != "relates_to":
+                elif not exclude_case_cache or (exclude_case_cache and edge.label != "relates_to"):
                     node_data = gr.add_edge(edge.src, edge.dst, edge.label)
 
                 # if max allowed depth is reach, do not add child nodes to queue anymore, record number of children
@@ -60,7 +60,8 @@ class GSearch(object):
             for node in nodes:
                 response.append(dict(
                     node_id=node.node_id,
-                    type=type(node).__name__
+                    type=type(node).__name__,
+                    children=len(node.edges_in)
                 ))
                 if len(response) == 10:
                     break

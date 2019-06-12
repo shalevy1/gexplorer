@@ -21,9 +21,11 @@ def make_app():
 
     # register views
     app.register_blueprint(views.index.blueprint)
+    app.register_blueprint(views.template.blueprint)
 
     # register api endpoints
-    app.register_blueprint(api.search.v0.blueprint)
+    app.register_blueprint(api.search.blueprint)
+    app.register_blueprint(api.stats.blueprint)
 
     # handle errors
     app.register_error_handler(404, page_not_found)
