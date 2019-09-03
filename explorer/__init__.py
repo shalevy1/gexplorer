@@ -44,13 +44,9 @@ def init_data_models():
     active_dict = os.environ.get("ACTIVE_DICT", "gdc")
     if active_dict == "gdc":
         from gdcdatamodel import models  # noqa
-    elif active_dict == "bio":
-        from datamodelutils import models as m
-        from biodictionary import biodictionary
-        from dictionaryutils import dictionary
-        dictionary.init(biodictionary)
-        from gdcdatamodel import models as biomodels
-        m.init(biomodels)
+#     elif active_dict == "bio":
+#         from biodictionary import biodictionary
+#         from gdcdatamodel import models
 
 
 def init_pg_graph():

@@ -1,2 +1,2 @@
-import index
-import template
+import explorer.views.index
+import explorer.views.template

@@ -1,2 +1,2 @@
-import search
-import stats
+import explorer.api.search
+import explorer.api.stats
