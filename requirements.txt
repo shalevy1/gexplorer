@@ -1,6 +1,7 @@
 flask==1.0.3
 python-dotenv==0.10.3
 waitress==1.3.0
+git+https://github.com/NCI-GDC/biodictionary.git@feat/TT-1102-py3-upgrade#egg=biodictionary
 git+https://github.com/NCI-GDC/gdcdictionary.git@release/py3#egg=gdcdictionary
 git+https://github.com/NCI-GDC/gdc-ng-models.git@release/redfish#egg=gdc_ng_models
 git+https://github.com/NCI-GDC/gdcdatamodel.git@feat/python3#egg=gdcdatamodel
