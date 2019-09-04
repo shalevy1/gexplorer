@@ -2,12 +2,12 @@ import psqlgraph
 from explorer.core import GExpl
 
 
-class GSearch(object):
+class TreeLoader(object):
 
     def __init__(self, pg_driver):
         self.g = pg_driver
 
-    def get_subtree(self, node_id, max_depth=4, max_breadth=10, exclude_case_cache=True):
+    def load_subtree(self, node_id, max_depth=4, max_breadth=40, exclude_case_cache=True):
         """ Loads a sub tree for the provided node id, using the specified max depth and width
         Args:
             node_id (str): root node id
@@ -18,14 +18,16 @@ class GSearch(object):
             GExpl: custom graph object
         """
         with self.g.session_scope():
+            gr = GExpl()
             start_node = self.g.nodes().get(node_id)
+
+            if not start_node:
+                return gr
 
             node_title = start_node._dictionary.get("title")
 
             if node_title in ["Program", "Project"]:
-                max_depth = 1
-
-            gr = GExpl()
+                max_depth = 1  # enforce a single depth for these node types
 
             nodes = [(start_node, None, 0)]  # node, edge, depth
 
@@ -52,11 +54,16 @@ class GSearch(object):
                         breadth += 1
             return gr
 
-    def find_matching(self, node_id):
-
+    def find_matching(self, node_id_pattern):
+        """ Finds nodes matching the given node_id
+        Args:
+            node_id_pattern (str): node_id pattern for matching 
+        Returns:
+            list[dict]: list of info on the nodes picked 
+        """
         response = []
         with self.g.session_scope():
-            nodes = self.g.nodes().filter(psqlgraph.Node.node_id.like("%{}%".format(node_id)))
+            nodes = self.g.nodes().filter(psqlgraph.Node.node_id.like("%{}%".format(node_id_pattern)))
             for node in nodes:
                 response.append(dict(
                     node_id=node.node_id,

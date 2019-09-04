@@ -9,7 +9,8 @@ import waitress
 
 from indexclient.client import IndexClient
 
-import explorer
+from explorer import app
+from explorer import mocks
 
 
 def parse_args():
@@ -17,7 +18,9 @@ def parse_args():
     parser = ArgumentParser(description="Graph Explorer script")
     parser.add_argument("-p", "--port",
                         help="HTTP port to listen on", required=False, type=int, default=19891)
-
+    parser.add_argument("-d", "--demo", help="Starts the server in demo mode", action="store_true")
+    parser.add_argument("--seed", help="GraphML seed data to add to database", type=str)
+    
     subparser = parser.add_subparsers()
 
     # starts services
@@ -40,11 +43,15 @@ def main():
     logger.setLevel(logging.INFO)
 
     args = parse_args()
-
+    
     action = args.action
     if action == "start":
-        app = explorer.make_app()
-        waitress.serve(app, host="0.0.0.0", port=args.port, threads=args.threads)
+        flask_app = app.make_app()
+
+        # init mock data
+        if args.demo:
+            mocks.make_data(args.seed, flask_app.db)
+        waitress.serve(flask_app, host="0.0.0.0", port=args.port, threads=args.threads, expose_tracebacks=True)
     else:
         raise NotImplementedError("Unsupported command {}", action)
 
