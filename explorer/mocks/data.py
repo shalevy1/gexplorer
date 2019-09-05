@@ -46,7 +46,7 @@ class MockData(object):
         if self.generated:
             return
 
-        file_loc = file_loc if file_loc else "{}/seed.json".format(os.path.dirname(__file__))
+        file_loc = file_loc if file_loc else "{}/samples/seed.json".format(os.path.dirname(__file__))
         graph = self._read_source(file_loc)
         global_props = {
             'properties': {

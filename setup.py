@@ -17,7 +17,12 @@ setup(
         "gdcdatamodel",
         "waitress"
     ],
-    package_data={"explorer": ["static/*.html", "static/*/*.js", "static/*/*.css"]},
+    package_data={"explorer": [
+        "static/*.html",
+        "static/*/*.js",
+        "static/*/*.css",
+        "mocks/samples/*.*"
+    ]},
     scripts=[
         "bin/gexplorer"
     ]
