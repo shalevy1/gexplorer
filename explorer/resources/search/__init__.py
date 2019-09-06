@@ -1,1 +1,1 @@
-import v0
+from explorer.resources.search import v0

@@ -1,2 +1,2 @@
-from index import Index
-from template import Template
+from explorer.resources.ui.index import Index
+from explorer.resources.ui.template import Template

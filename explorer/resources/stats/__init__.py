@@ -1,1 +1,1 @@
-import v0
+from explorer.resources.stats import v0

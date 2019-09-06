@@ -1,6 +1,6 @@
 import flask
 
-import service
+from explorer.resources.search import service
 
 
 blueprint = flask.Blueprint("search", __name__, url_prefix="/s")

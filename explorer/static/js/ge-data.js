@@ -16,7 +16,6 @@ function DataViewer() {
     this.searchResource = new GraphResource();
 }
 
-
 DataViewer.prototype.bindSearch = function () {
     let page = this;
     this.searchBar.addEventListener("keyup", function (evt) {
@@ -80,7 +79,9 @@ VisNetwork.prototype.getOptions = function () {
     return {
         groups: this.groups,
         interaction: {
-            hover: true
+            hover: true,
+            navigationButtons: true,
+            hideEdgesOnDrag: true
         },
         layout: {
             improvedLayout: false,
@@ -134,28 +135,28 @@ VisNetwork.prototype.render = function () {
         visNetwork.storeNetworkGroups(groups);
 
         let network = new vis.Network(visNetwork.container, data, visNetwork.getOptions());
-        network.on("clickx", function (params) {
-            params.event = "[original event]";
+        network.on("click", function (params) {
             let node = this.getNodeAt(params.pointer.DOM);
             if (node !== null && node !== undefined) {
-                let node_data = data.nodes.get(node);
-                visNetwork.modalAnchor.innerHTML = renderNetworkProperties(node_data);
-                UIkit.modal(visNetwork.modalAnchor).show();
+                let nodeData = data.nodes.get(node);
+                let nodeInfo = new NodeInfoView(nodeData.data).render();
+                UIkit.modal.dialog(nodeInfo);
             }
         });
 
 
-        network.on("click", function (params) {
+        network.on("doubleClick", function (params) {
             params.event = "[original event]";
             let node = this.getNodeAt(params.pointer.DOM);
             if (node !== null && node !== undefined) {
-                // render new nodes aif any
+                // render new nodes if any
                 visNetwork.renderNode(node);
             }
         });
         visNetwork.network = network;
     });
 };
+
 
 VisNetwork.prototype.renderNode = function (nodeId) {
     let visNetwork = this;
@@ -224,6 +225,25 @@ function renderNetworkProperties(networkData) {
         </div>
     `
 }
+
+function NodeInfoView(data) {
+	this.data = data;
+}
+
+NodeInfoView.prototype.render = function(){
+	let v = this.data;
+	return `
+		 <div uk-overflow-auto>
+            <table>
+                <tbody id="tbody" class="uk-table uk-table-striped uk-table-small">
+                   ${Object.keys(v.props).map(function(key) {
+                        return `<tr><td>${key}</td></tr>`    
+                   }).join("")} 
+                </tbody>
+            </table>
+		 </div>
+	`
+};
 
 (function() {
     let dv = new DataViewer();
