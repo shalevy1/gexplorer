@@ -6,6 +6,8 @@ class GNode(object):
         self.title = "{} ({})".format(label, self.id)
         self._data = data or {}
         self.shape = shape
+        
+        self.level = None
 
     def __eq__(self, other):
         if isinstance(other, GNode):
@@ -49,7 +51,7 @@ class GEdge(object):
         return {"from": self.src, "to": self.dst, "label": self.label, "id": self.edge_id}
 
 
-class GExpl(object):
+class Builder(object):
 
     def __init__(self):
         self.nodes = set()
@@ -57,15 +59,16 @@ class GExpl(object):
         self.groups = {}
         self.edge_labels = set()
 
-    def add_node(self, node):
+    def add_node(self, node, level=None):
         """ Adds a single node """
         n_data = dict(props=node.properties, sysan=node.system_annotations)
         node_title = node._dictionary.get("title")
         g_node = GNode(node.node_id, node_title, data=n_data)
+        g_node.level = level
         self.nodes.add(g_node)
         self.groups[node_title] = get_group(node_title)
 
-    def add_edge(self, src, dst, edge_label):
+    def add_edge(self, src, dst, edge_label, level=None):
         """ Adds an edge
         Args:
             src (psqlgraph.Node):
@@ -73,8 +76,8 @@ class GExpl(object):
             edge_label (str):
         """
 
-        self.add_node(src)
-        self.add_node(dst)
+        self.add_node(src, level)
+        self.add_node(dst, level + 1)
 
         # gdc graph has reverse representations for src/dst
         edge_data = GEdge(dst.node_id, src.node_id, edge_label)

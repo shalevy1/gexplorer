@@ -1,13 +1,16 @@
+import logging
+
 import psqlgraph
-from explorer.core import GExpl
+from explorer.core import Builder
 
 
-class GSearch(object):
+class TreeLoader(object):
 
     def __init__(self, pg_driver):
         self.g = pg_driver
+        self.logger = logging.getLogger(self.__module__ + "." + self.__class__.__name__)
 
-    def get_subtree(self, node_id, max_depth=4, max_breadth=10, exclude_case_cache=True):
+    def load_subtree(self, node_id, max_depth=4, max_breadth=40, exclude_case_cache=True):
         """ Loads a sub tree for the provided node id, using the specified max depth and width
         Args:
             node_id (str): root node id
@@ -15,29 +18,32 @@ class GSearch(object):
             max_breadth (int): defaults to 10
             exclude_case_cache (bool): defaults to True, exclude edges labeled `relates_to`
         Returns:
-            GExpl: custom graph object
+            Builder: custom graph object
         """
         with self.g.session_scope():
-            start_node = self.g.nodes().get(node_id)
+            builder = Builder()
+            root_node = self.g.nodes().get(node_id)
 
-            node_title = start_node._dictionary.get("title")
+            if not root_node:
+                self.logger.info("No node found with id {}", node_id)
+                return builder
+
+            node_title = root_node.label
 
             if node_title in ["Program", "Project"]:
-                max_depth = 1
+                max_depth = 1  # enforce a single depth for these node types
 
-            gr = GExpl()
-
-            nodes = [(start_node, None, 0)]  # node, edge, depth
+            nodes = [(root_node, None, 0)]  # node, edge, depth
 
             while nodes:
                 node, edge, current_depth = nodes.pop()
                 node_data = None
                 if not edge:
                     # handle nodes leaf nodes
-                    gr.add_node(node)
+                    builder.add_node(node, current_depth)
 
                 elif not exclude_case_cache or (exclude_case_cache and edge.label != "relates_to"):
-                    node_data = gr.add_edge(edge.src, edge.dst, edge.label)
+                    node_data = builder.add_edge(edge.src, edge.dst, edge.label, current_depth)
 
                 # if max allowed depth is reach, do not add child nodes to queue anymore, record number of children
                 if max_depth and current_depth >= max_depth:
@@ -50,13 +56,18 @@ class GSearch(object):
                         if breadth >= max_breadth:
                             break
                         breadth += 1
-            return gr
+            return builder
 
-    def find_matching(self, node_id):
-
+    def find_matching(self, node_id_pattern):
+        """ Finds nodes matching the given node_id
+        Args:
+            node_id_pattern (str): node_id pattern for matching 
+        Returns:
+            list[dict]: list of info on the nodes picked 
+        """
         response = []
         with self.g.session_scope():
-            nodes = self.g.nodes().filter(psqlgraph.Node.node_id.like("%{}%".format(node_id)))
+            nodes = self.g.nodes().filter(psqlgraph.Node.node_id.like("%{}%".format(node_id_pattern)))
             for node in nodes:
                 response.append(dict(
                     node_id=node.node_id,

@@ -16,7 +16,6 @@ function DataViewer() {
     this.searchResource = new GraphResource();
 }
 
-
 DataViewer.prototype.bindSearch = function () {
     let page = this;
     this.searchBar.addEventListener("keyup", function (evt) {
@@ -80,7 +79,9 @@ VisNetwork.prototype.getOptions = function () {
     return {
         groups: this.groups,
         interaction: {
-            hover: true
+            hover: true,
+            navigationButtons: true,
+            hideEdgesOnDrag: true
         },
         layout: {
             improvedLayout: false,
@@ -134,22 +135,21 @@ VisNetwork.prototype.render = function () {
         visNetwork.storeNetworkGroups(groups);
 
         let network = new vis.Network(visNetwork.container, data, visNetwork.getOptions());
-        network.on("clickx", function (params) {
-            params.event = "[original event]";
+        network.on("click", function (params) {
             let node = this.getNodeAt(params.pointer.DOM);
             if (node !== null && node !== undefined) {
-                let node_data = data.nodes.get(node);
-                visNetwork.modalAnchor.innerHTML = renderNetworkProperties(node_data);
-                UIkit.modal(visNetwork.modalAnchor).show();
+                let nodeData = data.nodes.get(node);
+                let nodeInfo = new NodeInfoView(nodeData).render();
+                UIkit.modal.dialog(nodeInfo);
             }
         });
 
 
-        network.on("click", function (params) {
+        network.on("doubleClick", function (params) {
             params.event = "[original event]";
             let node = this.getNodeAt(params.pointer.DOM);
             if (node !== null && node !== undefined) {
-                // render new nodes aif any
+                // render new nodes if any
                 visNetwork.renderNode(node);
             }
         });
@@ -223,6 +223,45 @@ function renderNetworkProperties(networkData) {
             </div>
         </div>
     `
+}
+
+function NodeInfoView(data) {
+	this.node = data;
+}
+
+NodeInfoView.prototype.render = function(){
+    let v = this.node;
+    return `
+		 <div class="ge-popup">
+		    <div class="uk-padding-small">
+    		    <h6>${v.title}</h6> 
+    		    <a href="javascript:void(0)" class="uk-icon-link" uk-icon="copy" onclick="javascript:toClipboard('${v.id}')"></a>
+            </div>
+            <table class="uk-table uk-table-striped uk-table-small">
+                <tbody id="tbody">
+                   ${Object.keys(v.data.props).map(function(key) {
+        return `<tr><td class="ge-node-key">${key}</td><td class="ge-node-value">${v.data.props[key]}</td></tr>`
+    }).join("")} 
+                </tbody>
+            </table>
+            <div class="uk-padding-small">
+                <button class="uk-button-primary">Export Tree</button>
+            </div>
+		 </div>
+	`
+};
+
+function toClipboard(text) {
+    let area = document.createElement("textarea");
+    // area.style.visibility = "hidden";
+    area.value = text;
+    document.body.appendChild(area);
+    area.select();
+    area.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+
+    document.body.removeChild(area);
+    console.log(text);
 }
 
 (function() {

@@ -1,0 +1,30 @@
+{
+	"nodes": [
+		{"label": "case", "submitter_id": "submitter_c1"},
+		{"label": "case", "submitter_id": "submitter_c2"},
+		{"label": "sample", "submitter_id": "submitter_s1"},
+		{"label": "sample", "submitter_id": "submitter_s2"},
+		{"label": "aliquot", "submitter_id": "submitter_a1"},
+		{"label": "aliquot", "submitter_id": "submitter_a2"},
+		{"label": "file", "submitter_id": "submitter_f1"},
+		{"label": "file", "submitter_id": "submitter_f2"},
+		{"label": "file", "submitter_id": "submitter_f3"},
+		{"label": "file", "submitter_id": "submitter_f4"},
+		{"label": "analysis_metadata", "submitter_id": "submitter_am1"},
+		{"label": "clinical_supplement", "submitter_id": "submitter_cs1"},
+		{"label": "experiment_metadata","submitter_id": "submitter_em1"}
+	],
+	"edges": [
+		{"dst": "submitter_c1", "src": "submitter_s1"},
+		{"dst": "submitter_c1", "src": "submitter_s2"},
+		{"dst": "submitter_s1", "src": "submitter_a1"},
+		{"dst": "submitter_s1", "src": "submitter_a2"},
+		{"dst": "submitter_a1", "src": "submitter_f1"},
+		{"dst": "submitter_a1", "src": "submitter_f2"},
+		{"dst": "submitter_a1", "src": "submitter_f3"},
+		{"dst": "submitter_a2", "src": "submitter_f4"},
+		{"dst": "submitter_f1", "src": "submitter_am1"},
+		{"dst": "submitter_f1", "src": "submitter_cs1"},
+		{"dst": "submitter_f3", "src": "submitter_em1"}
+	]
+}

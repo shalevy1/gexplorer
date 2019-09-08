@@ -1,4 +1,4 @@
-@import url("vis.min.css");
+@import url("vis-network.min.css");
 @import url("uikit.min.css");
 
 #search {
@@ -9,6 +9,10 @@
 .uk-accordion-title {
     background-color: #ddecff;
     padding: 5px;
+}
+
+.uk-table-small td, .uk-table-small th {
+    padding: 0 8px;
 }
 
 .ge-autocomplete {
@@ -42,6 +46,16 @@
 .ge-autocomplete-active {
   background-color: DodgerBlue !important;
   color: #ffffff;
+}
+
+.ge-popup {
+    font-size: 10px;
+    max-height: 256px;
+    overflow: auto;
+}
+
+.ge-node-key {
+    font-weight: bold;
 }
 
 input {
