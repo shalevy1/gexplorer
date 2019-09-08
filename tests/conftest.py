@@ -5,6 +5,7 @@ import uuid
 import psqlgraph
 import pytest
 
+from explorer import mocks
 
 SAMPLE_PROGRAM = "GDC"
 SAMPLE_PROJECT = "MISC"
@@ -71,12 +72,10 @@ def add_project(db_driver, models):
     with db_driver.session_scope():
         # create program
         program = models.Program(node_id=str(uuid.uuid4()))
-        program.dbgap_accession_number = "phs000335"
         program.name = SAMPLE_PROGRAM
 
         project = models.Project(node_id=str(uuid.uuid4()))
         project.code = SAMPLE_PROJECT
-        project.dbgap_accession_number = "phs000335"
         program.projects.append(project)
         db_driver.node_insert(program)
 
@@ -90,17 +89,7 @@ def sample_graph(db, graph_factory):
         db (psqlgraph.PsqlGraphDriver):
         graph_factory (psqlgraph.mock.GraphFactory):
     """
-    
-    seed_dir = os.path.dirname(__file__)
-    with open("{}/seed.json".format(seed_dir), "r") as r:
-        graph = json.loads(r.read(), "utf8")
-    
-    nodes = graph_factory.create_from_nodes_and_edges(nodes=graph["nodes"], 
-                                                      edges=graph["edges"], all_props=True)
-    
-    with db.session_scope() as x:
-        for node in nodes:
-            x.add(node)
+    nodes = mocks.make_data(source=None, g=db, add_to_existing=False)
     yield nodes
     with db.session_scope() as x:
         for stale_node in nodes:

@@ -139,7 +139,7 @@ VisNetwork.prototype.render = function () {
             let node = this.getNodeAt(params.pointer.DOM);
             if (node !== null && node !== undefined) {
                 let nodeData = data.nodes.get(node);
-                let nodeInfo = new NodeInfoView(nodeData.data).render();
+                let nodeInfo = new NodeInfoView(nodeData).render();
                 UIkit.modal.dialog(nodeInfo);
             }
         });
@@ -156,7 +156,6 @@ VisNetwork.prototype.render = function () {
         visNetwork.network = network;
     });
 };
-
 
 VisNetwork.prototype.renderNode = function (nodeId) {
     let visNetwork = this;
@@ -227,23 +226,43 @@ function renderNetworkProperties(networkData) {
 }
 
 function NodeInfoView(data) {
-	this.data = data;
+	this.node = data;
 }
 
 NodeInfoView.prototype.render = function(){
-	let v = this.data;
-	return `
-		 <div uk-overflow-auto>
-            <table>
-                <tbody id="tbody" class="uk-table uk-table-striped uk-table-small">
-                   ${Object.keys(v.props).map(function(key) {
-                        return `<tr><td>${key}</td></tr>`    
-                   }).join("")} 
+    let v = this.node;
+    return `
+		 <div class="ge-popup">
+		    <div class="uk-padding-small">
+    		    <h6>${v.title}</h6> 
+    		    <a href="javascript:void(0)" class="uk-icon-link" uk-icon="copy" onclick="javascript:toClipboard('${v.id}')"></a>
+            </div>
+            <table class="uk-table uk-table-striped uk-table-small">
+                <tbody id="tbody">
+                   ${Object.keys(v.data.props).map(function(key) {
+        return `<tr><td class="ge-node-key">${key}</td><td class="ge-node-value">${v.data.props[key]}</td></tr>`
+    }).join("")} 
                 </tbody>
             </table>
+            <div class="uk-padding-small">
+                <button class="uk-button-primary">Export Tree</button>
+            </div>
 		 </div>
 	`
 };
+
+function toClipboard(text) {
+    let area = document.createElement("textarea");
+    // area.style.visibility = "hidden";
+    area.value = text;
+    document.body.appendChild(area);
+    area.select();
+    area.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+
+    document.body.removeChild(area);
+    console.log(text);
+}
 
 (function() {
     let dv = new DataViewer();

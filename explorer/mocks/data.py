@@ -10,13 +10,16 @@ from psqlgraph import create_all, mocks
 
 class MockData(object):
 
-    def __init__(self, g, program, project):
+    def __init__(self, g, program, project, add_to_existing=False):
         self.g = g
         self.program = program
         self.project = project
 
         self.generated = False
-        
+
+        # allow adding more demo nodes even if project already exists
+        self.add_to_existing = add_to_existing
+
         self._add_tables()
     
     def _add_tables(self):
@@ -24,7 +27,8 @@ class MockData(object):
 
     def _make_program(self):
         with self.g.session_scope():
-            project = self.g.nodes(models.Project).props(code=self.project).path("programs").props(name=self.program).first()
+            project = self.g.nodes(models.Project).props(code=self.project).\
+                path("programs").props(name=self.program).first()
             if project:
                 self.generated = True
                 return project
@@ -40,13 +44,14 @@ class MockData(object):
 
             return project
 
-    def _read_source(self, file_loc):
+    @staticmethod
+    def _read_source(file_loc):
         with open(file_loc, "r") as r:
             return json.loads(r.read(), "utf8")
 
     def generate(self, file_loc):
         project = self._make_program()
-        if self.generated:
+        if not self.add_to_existing and self.generated:
             return
 
         file_loc = file_loc if file_loc else "{}/samples/seed.json".format(os.path.dirname(__file__))
@@ -65,4 +70,4 @@ class MockData(object):
                 if node.label == "case":
                     node.projects.append(project)
                 s.add(node)
-                
+        return nodes
